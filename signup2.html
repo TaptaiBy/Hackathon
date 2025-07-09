@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign Up | ProofPulse</title>
+  <link rel="stylesheet" href="styles2.css" />
+</head>
+<body class="hero">
+
+  <!-- Navigation Bar -->
+  <header>
+    <div class="logo">ProofPulse</div>
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="login.html">Login</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </nav>
+    <div class="auth-buttons">
+      <a href="login.html" class="btn">Sign In</a>
+      <a href="#" class="btn primary">Sign Up</a>
+    </div>
+  </header>
+
+  <!-- Sign Up Form -->
+  <div class="signup-container">
+    <h2>Sign Up for ProofPulse</h2>
+    <form id="signup-form" onsubmit="connectWallet(); return false;">
+      
+      <label for="name">Full Name:</label>
+      <input type="text" id="name" name="name" required />
+
+      <label for="id">ID Number:</label>
+      <input type="text" id="id" name="id" required />
+
+      <label for="dob">Date of Birth:</label>
+      <input type="date" id="dob" name="dob" required />
+
+      <label for="device">Preferred Fitness Device:</label>
+      <select id="device" name="device" required>
+        <option value="">-- Select Device --</option>
+        <option value="Apple Health">Apple Health</option>
+        <option value="Garmin">Garmin</option>
+        <option value="Strava">Strava</option>
+        <option value="Fitbit">Fitbit</option>
+      </select>
+
+      <label for="insurer">Insurer:</label>
+      <input type="text" id="insurer" name="insurer" required />
+
+      <label for="policy-number">Policy Number:</label>
+      <input type="text" id="policy-number" name="policy-number" required />
+
+      <label for="policy-value">Policy Value (USD):</label>
+      <input type="number" id="policy-value" name="policy-value" required />
+
+      <button type="submit" class="primary">Connect MetaMask & Sign Up</button>
+    </form>
+  </div>
+
+  <script>
+    async function connectWallet() {
+      if (typeof window.ethereum !== 'undefined') {
+        try {
+          await window.ethereum.request({ method: 'eth_requestAccounts' });
+          alert('MetaMask connected successfully! ✅');
+        } catch (error) {
+          alert('MetaMask connection failed.');
+        }
+      } else {
+        alert('MetaMask not found. Please install it.');
+      }
+    }
+  </script>
+</body>
+</html>
