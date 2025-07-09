@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pulseproof Dashboard</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #0000FF, #5C6EFF);
+      color: #fff;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      background-color: #FF00B4;
+    }
+    .logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    .container {
+      padding: 2rem;
+      max-width: 1200px;
+      margin: auto;
+    }
+    .dashboard {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 2rem;
+      grid-template-areas:
+        "character metrics"
+        "activity rewards"
+        "quests quests";
+    }
+    .card {
+      background: #fff;
+      color: #222;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+    }
+    .card:hover {
+      transform: scale(1.02);
+    }
+    .card h3 {
+      margin-top: 0;
+    }
+    .stats-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .stats-table td {
+      padding: 0.5rem 0;
+    }
+    .progress {
+      background: #eee;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-top: 0.5rem;
+    }
+    .progress-bar {
+      height: 10px;
+      background: #FF00B4;
+    }
+    .quests ul {
+      list-style: none;
+      padding: 0;
+    }
+    .quests li {
+      background: #f1f1f1;
+      color: #333;
+      padding: 0.75rem;
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+    }
+    .character-card {
+      grid-area: character;
+      padding: 2.5rem;
+      font-size: 1.1rem;
+    }
+    .metrics-card { grid-area: metrics; }
+    .activity-card { grid-area: activity; }
+    .rewards-card { grid-area: rewards; }
+    .quests-card { grid-area: quests; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">Pulseproof</div>
+    <div>
+      <a href="#" style="color: white; margin-right: 1rem;">Logout</a>
+    </div>
+  </header>
+
+  <div class="container">
+    <h1>Welcome, FitWarrior! ✨</h1>
+
+    <div class="dashboard">
+      <div class="card character-card">
+        <h3>👤 Character Status</h3>
+        <p><strong>Level:</strong> 7 - "Sweat Slayer"</p>
+        <p><strong>XP:</strong> 540 / 1000</p>
+        <div class="progress"><div class="progress-bar" style="width: 54%"></div></div>
+        <p><strong>Badges:</strong> Early Bird, 10K Champion</p>
+      </div>
+
+      <div class="card metrics-card">
+        <h3>🏋️ Body Metrics</h3>
+        <table class="stats-table">
+          <tr><td>Height:</td><td>169 cm</td></tr>
+          <tr><td>Weight:</td><td>77.3 kg</td></tr>
+          <tr><td>Body Fat:</td><td>20.8%</td></tr>
+        </table>
+      </div>
+
+      <div class="card activity-card">
+        <h3>🚶️ Daily Activity</h3>
+        <table class="stats-table">
+          <tr><td>Steps:</td><td id="steps">8,123</td></tr>
+          <tr><td>Sleep:</td><td id="sleep">6.5 hrs</td></tr>
+          <tr><td>Calories:</td><td id="calories">430 kcal</td></tr>
+        </table>
+      </div>
+
+      <div class="card rewards-card">
+        <h3>🌟 Points & Rewards</h3>
+        <p><strong>Total Points:</strong> 1,250</p>
+        <p><strong>Today:</strong> +120</p>
+        <div class="progress"><div class="progress-bar" style="width: 75%"></div></div>
+        <p>Next reward at 1500 pts</p>
+      </div>
+
+      <div class="card quests-card quests">
+        <h3>🚀 Daily Quests</h3>
+        <ul>
+          <li>✅ Walk 10,000 steps</li>
+          <li>✅ Sleep 7+ hours</li>
+          <li>❌ Drink 2L water</li>
+          <li>⚫ Sync wearable device</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function getMockWearableData() {
+      return {
+        steps: Math.floor(6000 + Math.random() * 5000),
+        sleep: (5 + Math.random() * 3).toFixed(1),
+        calories: Math.floor(300 + Math.random() * 300),
+      };
+    }
+
+    function updateDashboardWithMockData() {
+      const data = getMockWearableData();
+
+      document.querySelector('#steps').textContent = data.steps.toLocaleString();
+      document.querySelector('#sleep').textContent = `${data.sleep} hrs`;
+      document.querySelector('#calories').textContent = `${data.calories} kcal`;
+    }
+
+    updateDashboardWithMockData();
+    setInterval(updateDashboardWithMockData, 10000);
+  </script>
+</body>
+</html>
