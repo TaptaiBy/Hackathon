@@ -202,6 +202,12 @@ footer {
   cursor: pointer;
   transition: background 0.3s ease;
 }
+.signup-container label {
+  display: block;
+  margin-top: 1rem;
+  font-weight: bold;
+  color: var(--color-text-dark); /* Add this line */
+}
 
 .signup-container button:hover {
   background-color: var(--color-medium-pink);
