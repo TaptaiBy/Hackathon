@@ -89,3 +89,17 @@ body.dashboard {
   margin-bottom: 2rem;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
+.card-content {
+  background: #fff;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border: 1px solid #ddd;         /* 👈 Light border to show edges */
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06); /* 👈 Subtle shadow */
+  transition: box-shadow 0.3s ease;
+}
+
+.card-content:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);  /* Hover effect (optional) */
+}
+
