@@ -1,90 +1,82 @@
-import React from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Activity, HeartPulse, Gift, ShieldCheck, RefreshCw, User, LogOut } from "lucide-react";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard | Proofpulse</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Top Navigation Bar -->
+    <header class="navbar">
+      <div class="logo">Proofpulse</div>
+      <nav class="nav-links">
+        <a href="#">Home</a>
+        <a href="#">Rewards</a>
+        <a href="#">Insurer Info</a>
+        <a href="#">Settings</a>
+      </nav>
+      <div class="profile-icon">👤</div>
+    </header>
 
-export default function Dashboard() {
-  return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
-      {/* Top Navigation Bar */}
-      <header className="sticky top-0 z-50 bg-white shadow-md p-4 flex justify-between items-center">
-        <div className="text-2xl font-bold text-green-600">Proofpulse</div>
-        <nav className="hidden md:flex space-x-6">
-          <a href="#" className="text-gray-700 hover:text-green-600">Home</a>
-          <a href="#" className="text-gray-700 hover:text-green-600">Rewards</a>
-          <a href="#" className="text-gray-700 hover:text-green-600">Insurer Info</a>
-          <a href="#" className="text-gray-700 hover:text-green-600">Settings</a>
-        </nav>
-        <User className="w-6 h-6 text-gray-600" />
-      </header>
+    <div class="main-wrapper">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <a href="#">📊 Dashboard</a>
+        <a href="#">🔄 Sync Device</a>
+        <a href="#">🎁 Redeem Rewards</a>
+        <a href="#">🛡️ Policy Info</a>
+        <a href="#" class="logout">🚪 Logout</a>
+      </aside>
 
-      <div className="flex flex-1">
-        {/* Sidebar */}
-        <aside className="hidden md:block w-60 m-4 rounded-xl backdrop-blur-md bg-white/70 shadow-md p-4 space-y-6">
-          <a href="#" className="flex items-center text-gray-700 hover:text-green-600"><Activity className="mr-2" /> Dashboard</a>
-          <a href="#" className="flex items-center text-gray-700 hover:text-green-600"><RefreshCw className="mr-2" /> Sync Device</a>
-          <a href="#" className="flex items-center text-gray-700 hover:text-green-600"><Gift className="mr-2" /> Redeem Rewards</a>
-          <a href="#" className="flex items-center text-gray-700 hover:text-green-600"><ShieldCheck className="mr-2" /> Policy Info</a>
-          <a href="#" className="flex items-center text-gray-700 hover:text-red-500"><LogOut className="mr-2" /> Logout</a>
-        </aside>
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Welcome Panel -->
+        <section class="card-content">
+          <h2>👋 Welcome, John!</h2>
+          <p>🔄 Last Sync: 2 hours ago from Apple Watch</p>
+          <p class="tip">💡 Tip: Sync daily to earn full reward points!</p>
+        </section>
 
-        {/* Main Content */}
-        <main className="flex-1 p-6 space-y-6">
-          {/* Welcome Panel */}
-          <Card>
-            <CardContent className="p-4">
-              <h2 className="text-xl font-semibold">👋 Welcome, John!</h2>
-              <p className="text-sm text-gray-600 mt-1">🔄 Last Sync: 2 hours ago from Apple Watch</p>
-              <p className="text-sm text-blue-600 mt-2">💡 Tip: Sync daily to earn full reward points!</p>
-            </CardContent>
-          </Card>
+        <!-- Activity Snapshot -->
+        <section class="card-content">
+          <h3>🏃‍♂️ Real-Time Workout Stats</h3>
+          <p>Steps Today: <span>7,350</span></p>
+          <p>Active Minutes: <span>52 min</span></p>
+          <p>Calories Burned: <span>540 kcal</span></p>
+          <p>Device Status: <span class="status">✅ Synced with Apple Health</span></p>
+        </section>
 
-          {/* Activity Snapshot */}
-          <Card>
-            <CardContent className="p-4 space-y-2">
-              <h3 className="font-semibold text-lg mb-2">🏃‍♂️ Real-Time Workout Stats</h3>
-              <p>Steps Today: <span className="font-bold">7,350</span></p>
-              <p>Active Minutes: <span className="font-bold">52 min</span></p>
-              <p>Calories Burned: <span className="font-bold">540 kcal</span></p>
-              <p>Device Status: <span className="text-green-600 font-semibold">✅ Synced with Apple Health</span></p>
-            </CardContent>
-          </Card>
+        <!-- Rewards Overview -->
+        <section class="card-content">
+          <h3>🎯 Rewards Overview</h3>
+          <p>Points Earned Today: <span>34 pts</span></p>
+          <p>Weekly Total: <span>162 pts</span></p>
+          <p>Lifetime Points: <span>4,820 pts</span></p>
+          <button class="btn" disabled>🔁 Redeem Points</button>
+        </section>
 
-          {/* Rewards Overview */}
-          <Card>
-            <CardContent className="p-4 space-y-2">
-              <h3 className="font-semibold text-lg mb-2">🎯 Rewards Overview</h3>
-              <p>Points Earned Today: <span className="font-bold">34 pts</span></p>
-              <p>Weekly Total: <span className="font-bold">162 pts</span></p>
-              <p>Lifetime Points: <span className="font-bold">4,820 pts</span></p>
-              <Button disabled className="mt-2">🔁 Redeem Points</Button>
-            </CardContent>
-          </Card>
+        <!-- Insurer Panel -->
+        <section class="card-content">
+          <h3>🛡️ Insurer Info</h3>
+          <p>Connected Insurer: <span>AIA Health</span></p>
+          <p>Policy Number: <span>#AIA883001</span></p>
+          <p>Verification Status: <span class="status">✅ Validated</span></p>
+          <p>Reward Tier: <span>Silver</span></p>
+          <p>Next Tier: Gold (in <span>380 pts</span>)</p>
+        </section>
 
-          {/* Insurer Panel */}
-          <Card>
-            <CardContent className="p-4 space-y-2">
-              <h3 className="font-semibold text-lg mb-2">🛡️ Insurer Info</h3>
-              <p>Connected Insurer: <span className="font-bold">AIA Health</span></p>
-              <p>Policy Number: <span className="font-bold">#AIA883001</span></p>
-              <p>Verification Status: <span className="text-green-600 font-semibold">✅ Validated</span></p>
-              <p>Reward Tier: <span className="font-bold">Silver</span></p>
-              <p>Next Tier: Gold (in <span className="font-bold">380 pts</span>)</p>
-            </CardContent>
-          </Card>
-
-          {/* Blockchain Proof */}
-          <Card>
-            <CardContent className="p-4 space-y-2">
-              <h3 className="font-semibold text-lg mb-2">🔗 Blockchain Proof</h3>
-              <p>HealthID NFT: <span className="text-green-600 font-semibold">✅ Issued</span></p>
-              <p>Last Verification Hash: <code className="bg-gray-200 px-2 py-1 rounded">0x47d...a98e</code></p>
-              <p>Smart Contract Pool: <span className="font-bold">Wellness-Alpha</span></p>
-              <div className="text-blue-600">Transparency: View on <a href="#" className="underline">Etherscan</a> or <a href="#" className="underline">Explorer</a></div>
-            </CardContent>
-          </Card>
-        </main>
-      </div>
+        <!-- Blockchain Proof -->
+        <section class="card-content">
+          <h3>🔗 Blockchain Proof</h3>
+          <p>HealthID NFT: <span class="status">✅ Issued</span></p>
+          <p>Last Verification Hash: <code class="hash">0x47d...a98e</code></p>
+          <p>Smart Contract Pool: <span>Wellness-Alpha</span></p>
+          <div class="links">Transparency: View on <a href="#">Etherscan</a> or <a href="#">Explorer</a></div>
+        </section>
+      </main>
     </div>
-  );
-}
+  </div>
+</body>
+</html>
