@@ -1,68 +1,90 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pulseproof Dashboard</title>
-  <link rel="stylesheet" href="styles.css" />
+import React from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Activity, HeartPulse, Gift, ShieldCheck, RefreshCw, User, LogOut } from "lucide-react";
 
-</head>
-<body>
-  <header>
-    <div class="logo">Pulseproof</div>
-    <div>
-      <a href="#" style="color: white; margin-right: 1rem;">Logout</a>
+export default function Dashboard() {
+  return (
+    <div className="min-h-screen bg-gray-100 flex flex-col">
+      {/* Top Navigation Bar */}
+      <header className="sticky top-0 z-50 bg-white shadow-md p-4 flex justify-between items-center">
+        <div className="text-2xl font-bold text-green-600">Proofpulse</div>
+        <nav className="hidden md:flex space-x-6">
+          <a href="#" className="text-gray-700 hover:text-green-600">Home</a>
+          <a href="#" className="text-gray-700 hover:text-green-600">Rewards</a>
+          <a href="#" className="text-gray-700 hover:text-green-600">Insurer Info</a>
+          <a href="#" className="text-gray-700 hover:text-green-600">Settings</a>
+        </nav>
+        <User className="w-6 h-6 text-gray-600" />
+      </header>
+
+      <div className="flex flex-1">
+        {/* Sidebar */}
+        <aside className="hidden md:block w-60 m-4 rounded-xl backdrop-blur-md bg-white/70 shadow-md p-4 space-y-6">
+          <a href="#" className="flex items-center text-gray-700 hover:text-green-600"><Activity className="mr-2" /> Dashboard</a>
+          <a href="#" className="flex items-center text-gray-700 hover:text-green-600"><RefreshCw className="mr-2" /> Sync Device</a>
+          <a href="#" className="flex items-center text-gray-700 hover:text-green-600"><Gift className="mr-2" /> Redeem Rewards</a>
+          <a href="#" className="flex items-center text-gray-700 hover:text-green-600"><ShieldCheck className="mr-2" /> Policy Info</a>
+          <a href="#" className="flex items-center text-gray-700 hover:text-red-500"><LogOut className="mr-2" /> Logout</a>
+        </aside>
+
+        {/* Main Content */}
+        <main className="flex-1 p-6 space-y-6">
+          {/* Welcome Panel */}
+          <Card>
+            <CardContent className="p-4">
+              <h2 className="text-xl font-semibold">👋 Welcome, John!</h2>
+              <p className="text-sm text-gray-600 mt-1">🔄 Last Sync: 2 hours ago from Apple Watch</p>
+              <p className="text-sm text-blue-600 mt-2">💡 Tip: Sync daily to earn full reward points!</p>
+            </CardContent>
+          </Card>
+
+          {/* Activity Snapshot */}
+          <Card>
+            <CardContent className="p-4 space-y-2">
+              <h3 className="font-semibold text-lg mb-2">🏃‍♂️ Real-Time Workout Stats</h3>
+              <p>Steps Today: <span className="font-bold">7,350</span></p>
+              <p>Active Minutes: <span className="font-bold">52 min</span></p>
+              <p>Calories Burned: <span className="font-bold">540 kcal</span></p>
+              <p>Device Status: <span className="text-green-600 font-semibold">✅ Synced with Apple Health</span></p>
+            </CardContent>
+          </Card>
+
+          {/* Rewards Overview */}
+          <Card>
+            <CardContent className="p-4 space-y-2">
+              <h3 className="font-semibold text-lg mb-2">🎯 Rewards Overview</h3>
+              <p>Points Earned Today: <span className="font-bold">34 pts</span></p>
+              <p>Weekly Total: <span className="font-bold">162 pts</span></p>
+              <p>Lifetime Points: <span className="font-bold">4,820 pts</span></p>
+              <Button disabled className="mt-2">🔁 Redeem Points</Button>
+            </CardContent>
+          </Card>
+
+          {/* Insurer Panel */}
+          <Card>
+            <CardContent className="p-4 space-y-2">
+              <h3 className="font-semibold text-lg mb-2">🛡️ Insurer Info</h3>
+              <p>Connected Insurer: <span className="font-bold">AIA Health</span></p>
+              <p>Policy Number: <span className="font-bold">#AIA883001</span></p>
+              <p>Verification Status: <span className="text-green-600 font-semibold">✅ Validated</span></p>
+              <p>Reward Tier: <span className="font-bold">Silver</span></p>
+              <p>Next Tier: Gold (in <span className="font-bold">380 pts</span>)</p>
+            </CardContent>
+          </Card>
+
+          {/* Blockchain Proof */}
+          <Card>
+            <CardContent className="p-4 space-y-2">
+              <h3 className="font-semibold text-lg mb-2">🔗 Blockchain Proof</h3>
+              <p>HealthID NFT: <span className="text-green-600 font-semibold">✅ Issued</span></p>
+              <p>Last Verification Hash: <code className="bg-gray-200 px-2 py-1 rounded">0x47d...a98e</code></p>
+              <p>Smart Contract Pool: <span className="font-bold">Wellness-Alpha</span></p>
+              <div className="text-blue-600">Transparency: View on <a href="#" className="underline">Etherscan</a> or <a href="#" className="underline">Explorer</a></div>
+            </CardContent>
+          </Card>
+        </main>
+      </div>
     </div>
-  </header>
-
-  <div class="container">
-    <h1>Welcome, FitWarrior! ✨</h1>
-
-    <div class="dashboard">
-      <div class="card">
-        <h3>👤 Character Status</h3>
-        <p><strong>Level:</strong> 7 - "Sweat Slayer"</p>
-        <p><strong>XP:</strong> 540 / 1000</p>
-        <div class="progress"><div class="progress-bar" style="width: 54%"></div></div>
-        <p><strong>Badges:</strong> Early Bird, 10K Champion</p>
-      </div>
-
-      <div class="card">
-        <h3>🏋️ Body Metrics</h3>
-        <table class="stats-table">
-          <tr><td>Height:</td><td>169 cm</td></tr>
-          <tr><td>Weight:</td><td>77.3 kg</td></tr>
-          <tr><td>Body Fat:</td><td>20.8%</td></tr>
-        </table>
-      </div>
-
-      <div class="card">
-        <h3>🚶️ Daily Activity</h3>
-        <table class="stats-table">
-          <tr><td>Steps:</td><td>8,123</td></tr>
-          <tr><td>Sleep:</td><td>6.5 hrs</td></tr>
-          <tr><td>Calories:</td><td>430 kcal</td></tr>
-        </table>
-      </div>
-
-      <div class="card">
-        <h3>🌟 Points & Rewards</h3>
-        <p><strong>Total Points:</strong> 1,250</p>
-        <p><strong>Today:</strong> +120</p>
-        <div class="progress"><div class="progress-bar" style="width: 75%"></div></div>
-        <p>Next reward at 1500 pts</p>
-      </div>
-
-      <div class="card quests" style="grid-column: span 2;">
-        <h3>🚀 Daily Quests</h3>
-        <ul>
-          <li>✅ Walk 10,000 steps</li>
-          <li>✅ Sleep 7+ hours</li>
-          <li>❌ Drink 2L water</li>
-          <li>⚫ Sync wearable device</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</body>
-</html>
+  );
+}
