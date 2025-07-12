@@ -114,7 +114,7 @@
   <script>
        async function fetchMockData() {
       try {
-        const response = await fetch('mockhealth.json');
+        const response = await fetch('assets/mock/mockhealthdata.json');
         const data = await response.json();
 
         document.querySelector('#steps').textContent = data.steps.toLocaleString();
@@ -130,9 +130,9 @@
       alert('Smart contract function triggered!');
     }
 
-    window.addEventListener('DOMContentLoaded', () => {
-      updateDashboardWithMockData();
-      setInterval(updateDashboardWithMockData, 10000);
+       window.addEventListener('DOMContentLoaded', () => {
+      fetchMockData();
+      setInterval(fetchMockData, 10000);
     });
   </script>
 </head>
