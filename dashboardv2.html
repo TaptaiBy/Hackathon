@@ -108,6 +108,12 @@
         <p><strong>XP:</strong> 540 / 1000</p>
         <div class="progress"><div class="progress-bar" style="width: 54%"></div></div>
         <p><strong>Badges:</strong> Early Bird, 10K Champion</p>
+        <hr style="margin: 1.5rem 0;">
+        <h3>🔗 Blockchain Proof</h3>
+        <p>HealthID NFT: <span class="status">✅ Issued</span></p>
+        <p>Last Verification Hash: <code class="hash">0x47d...a98e</code></p>
+        <p>Smart Contract Pool: <span>Wellness-Alpha</span></p>
+        <div class="links">Transparency: View on <a href="#">Etherscan</a> or <a href="#">Explorer</a></div>
       </div>
 
       <div class="card metrics-card">
@@ -148,25 +154,6 @@
     </div>
   </div>
 
-  <script>
-    function getMockWearableData() {
-      return {
-        steps: Math.floor(6000 + Math.random() * 5000),
-        sleep: (5 + Math.random() * 3).toFixed(1),
-        calories: Math.floor(300 + Math.random() * 300),
-      };
-    }
 
-    function updateDashboardWithMockData() {
-      const data = getMockWearableData();
-
-      document.querySelector('#steps').textContent = data.steps.toLocaleString();
-      document.querySelector('#sleep').textContent = `${data.sleep} hrs`;
-      document.querySelector('#calories').textContent = `${data.calories} kcal`;
-    }
-
-    updateDashboardWithMockData();
-    setInterval(updateDashboardWithMockData, 10000);
-  </script>
 </body>
 </html>
