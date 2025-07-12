@@ -114,53 +114,44 @@ nav a {
   padding: 4rem 2rem;
   color: white;
 }
-.section {
-  padding: 3rem 2rem;
-  text-align: center;
-  background: var(--color-bg-section);
-}
 
-.section.alt {
-  background: var(--color-light-pink);
-}
-
-.cards {
+/* Cards & Steps Styling */
+.cards, .steps {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 1.5rem;
+  gap: 2rem;
   margin-top: 2rem;
 }
 
-.card {
-  background: white;
+.card, .step {
+  background: rgba(255, 255, 255, 0.1);
   padding: 1.5rem;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  width: 260px;
-  transition: transform 0.3s;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+  width: 250px;
+  text-align: center;
 }
 
-.card:hover {
-  transform: translateY(-6px);
+.section h2 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
 }
 
-.steps {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 1rem;
-  margin-top: 2rem;
+/* Responsive Design */
+@media (max-width: 768px) {
+  .cards, .steps {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .card, .step {
+    width: 100%;
+    max-width: 300px;
+  }
 }
 
-.step {
-  background: var(--color-sky-blue);
-  color: white;
-  padding: 1rem 1.5rem;
-  border-radius: 10px;
-  width: 200px;
-  font-weight: bold;
-}
 
 footer {
   text-align: center;
