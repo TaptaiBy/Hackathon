@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pulseproof Dashboard</title>
-  <link rel="stylesheet" href="dashboardstyles.css" />
+  <title>Proofpulse Dashboard</title>
+  <link rel="stylesheet" href="dashboard.css" />
   <style>
     body {
       margin: 0;
@@ -79,10 +79,14 @@
       border-radius: 8px;
       margin-bottom: 0.5rem;
     }
-    .character-card {
-      grid-area: character;
-      padding: 2.5rem;
-      font-size: 1.1rem;
+    .character-card { grid-area: character; padding: 2.5rem; font-size: 1.1rem; text-align: center; }
+    .character-avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      margin-bottom: 1rem;
+      object-fit: cover;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
     .metrics-card { grid-area: metrics; }
     .activity-card { grid-area: activity; }
@@ -92,7 +96,7 @@
 </head>
 <body>
   <header>
-    <div class="logo">Pulseproof</div>
+    <div class="logo">Proofpulse</div>
     <div>
       <a href="#" style="color: white; margin-right: 1rem;">Logout</a>
     </div>
@@ -103,6 +107,7 @@
 
     <div class="dashboard">
       <div class="card character-card">
+        <img src="https://cdn-icons-png.flaticon.com/512/1995/1995520.png" alt="Avatar" class="character-avatar">
         <h3>👤 Character Status</h3>
         <p><strong>Level:</strong> 7 - "Sweat Slayer"</p>
         <p><strong>XP:</strong> 540 / 1000</p>
@@ -112,7 +117,6 @@
         <h3>🔗 Blockchain Proof</h3>
         <p>HealthID NFT: <span class="status">✅ Issued</span></p>
         <p>Last Verification Hash: <code class="hash">0x47d...a98e</code></p>
-        <p>Smart Contract Pool: <span>Wellness-Alpha</span></p>
         <div class="links">Transparency: View on <a href="#">Etherscan</a> or <a href="#">Explorer</a></div>
       </div>
 
@@ -153,7 +157,5 @@
       </div>
     </div>
   </div>
-
-
 </body>
 </html>
