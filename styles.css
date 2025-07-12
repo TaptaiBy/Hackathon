@@ -134,6 +134,11 @@ nav a {
   text-align: center;
 }
 
+.card:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
 .section h2 {
   font-size: 2rem;
   margin-bottom: 1rem;
@@ -152,6 +157,12 @@ nav a {
   }
 }
 
+}
+.section {
+  padding: 3rem 2rem;
+  text-align: center;
+  background: var(--color-bg-section);
+}
 
 footer {
   text-align: center;
