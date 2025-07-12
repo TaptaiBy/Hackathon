@@ -112,20 +112,18 @@
     .quests-card { grid-area: quests; }
   </style>
   <script>
-    function getMockWearableData() {
-      return {
-        steps: Math.floor(6000 + Math.random() * 5000),
-        sleep: (5 + Math.random() * 3).toFixed(1),
-        calories: Math.floor(300 + Math.random() * 300),
-      };
-    }
+      async function fetchMockData() {
+    try {
+      const response = await fetch('assets/mock/mockhealthdata.json');
+      const data = await response.json();
 
-    function updateDashboardWithMockData() {
-      const data = getMockWearableData();
       document.querySelector('#steps').textContent = data.steps.toLocaleString();
       document.querySelector('#sleep').textContent = `${data.sleep} hrs`;
       document.querySelector('#calories').textContent = `${data.calories} kcal`;
+    } catch (error) {
+      console.error('Failed to fetch mock data:', error);
     }
+  }
 
     function triggerSmartContract() {
       alert('Smart contract function triggered!');
