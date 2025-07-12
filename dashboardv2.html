@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Proofpulse Dashboard</title>
+  <title>Proofpulse</title>
   <link rel="stylesheet" href="dashboard.css" />
   <style>
     body {
@@ -22,6 +22,19 @@
     .logo {
       font-size: 1.5rem;
       font-weight: bold;
+    }
+    .redeem-btn {
+      background-color: #fff;
+      color: #FF00B4;
+      font-weight: bold;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .redeem-btn:hover {
+      background-color: #ffe6f0;
     }
     .container {
       padding: 2rem;
@@ -98,32 +111,38 @@
     .rewards-card { grid-area: rewards; }
     .quests-card { grid-area: quests; }
   </style>
-<script>
-  async function fetchMockData() {
-    try {
-      const response = await fetch('assets/mock/mockhealthdata.json');
-      const data = await response.json();
+  <script>
+    function getMockWearableData() {
+      return {
+        steps: Math.floor(6000 + Math.random() * 5000),
+        sleep: (5 + Math.random() * 3).toFixed(1),
+        calories: Math.floor(300 + Math.random() * 300),
+      };
+    }
 
+    function updateDashboardWithMockData() {
+      const data = getMockWearableData();
       document.querySelector('#steps').textContent = data.steps.toLocaleString();
       document.querySelector('#sleep').textContent = `${data.sleep} hrs`;
       document.querySelector('#calories').textContent = `${data.calories} kcal`;
-    } catch (error) {
-      console.error('Failed to fetch mock data:', error);
     }
-  }
 
-  window.addEventListener('DOMContentLoaded', () => {
-    fetchMockData();
-    setInterval(fetchMockData, 10000);
-  });
-</script>
+    function triggerSmartContract() {
+      alert('Smart contract function triggered!');
+    }
 
+    window.addEventListener('DOMContentLoaded', () => {
+      updateDashboardWithMockData();
+      setInterval(updateDashboardWithMockData, 10000);
+    });
+  </script>
 </head>
 <body>
   <header>
     <div class="logo">Proofpulse</div>
     <div>
-      <a href="#" style="color: white; margin-right: 1rem;">Logout</a>
+      <button class="redeem-btn" onclick="triggerSmartContract()">🎁 Redeem</button>
+      <a href="index.html" style="color: white; margin-left: 1rem;">Logout</a>
     </div>
   </header>
 
@@ -132,7 +151,7 @@
 
     <div class="dashboard">
       <div class="card character-card">
-        <img src="https://cdn-icons-png.flaticon.com/512/9131/9131529.png" alt="Avatar" class="character-avatar">
+        <img src="https://cdn-icons-png.flaticon.com/512/5719/5719910.png" alt="Avatar" class="character-avatar">
         <h3>👤 Character Status</h3>
         <p><strong>Level:</strong> 7 - "Sweat Slayer"</p>
         <p><strong>XP:</strong> 540 / 1000</p>
