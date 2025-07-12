@@ -139,6 +139,11 @@ nav a {
   box-shadow: 0 10px 25px rgba(0,0,0,0.2);
 }
 
+.content-wrapper {
+  position: relative;
+  z-index: 1;
+}
+
 .section h2 {
   font-size: 2rem;
   margin-bottom: 1rem;
