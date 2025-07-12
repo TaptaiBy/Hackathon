@@ -15,27 +15,34 @@
     <p id="status"></p>
   </section>
 
-  <script>
-    const connectBtn = document.getElementById('connectBtn');
-    const status = document.getElementById('status');
+ <script>
+  const connectBtn = document.getElementById('connectBtn');
+  const status = document.getElementById('status');
 
-    async function connectWallet() {
-      if (window.ethereum) {
-        try {
-          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-          const walletAddress = accounts[0];
-          status.textContent = `Connected: ${walletAddress}`;
-        } catch (error) {
-          status.textContent = 'Connection rejected.';
-          console.error(error);
-        }
-      } else {
-        status.textContent = 'MetaMask not detected. Please install it.';
+  async function connectWallet() {
+    if (window.ethereum) {
+      try {
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const walletAddress = accounts[0];
+        status.textContent = `Connected: ${walletAddress}`;
+
+        // ✅ Redirect to dashboard after login
+        setTimeout(() => {
+          window.location.href = "dashboardv2.html"; // change this if your dashboard file has a different name
+        }, 1000); // optional delay to show success message
+
+      } catch (error) {
+        status.textContent = 'Connection rejected.';
+        console.error(error);
       }
+    } else {
+      status.textContent = 'MetaMask not detected. Please install it.';
     }
+  }
 
-    connectBtn.addEventListener('click', connectWallet);
-  </script>
+  connectBtn.addEventListener('click', connectWallet);
+</script>
+
 
 </body>
 </html>
