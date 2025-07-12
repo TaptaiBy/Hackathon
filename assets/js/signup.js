@@ -8,7 +8,7 @@ document.getElementById("signupForm").addEventListener("submit", async function 
   const device = document.getElementById("device").value;
   const insurer = document.getElementById("insurer").value;
   const policyNumber = document.getElementById("policy-number").value;
-  const policyValue = document.getElementById("policy-value").value;
+  const policyValue = document.getElementById("policy-value").value.toString;
   const CONTRACT_ABI = [{
   "inputs": [],
   "name": "reclaimUnclaimed",
