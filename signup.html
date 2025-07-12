@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Sign Up | ProofPulse</title>
   <link rel="stylesheet" href="styles.css" />
-  <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
 </head>
 <body>
 
@@ -44,20 +43,8 @@
     </form>
   </div>
 
-  <script>
-    async function connectWallet() {
-      if (typeof window.ethereum !== 'undefined') {
-        try {
-          await window.ethereum.request({ method: 'eth_requestAccounts' });
-          alert('MetaMask connected successfully! ✅');
-          // Here you'd handle form data and send it to your backend/smart contract
-        } catch (error) {
-          alert('MetaMask connection failed.');
-        }
-      } else {
-        alert('MetaMask not found. Please install it.');
-      }
-    }
-  </script>
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+  <script src="assets/js/signup.js"></script>
+
 </body>
 </html>
