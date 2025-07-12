@@ -93,6 +93,26 @@
     .rewards-card { grid-area: rewards; }
     .quests-card { grid-area: quests; }
   </style>
+<script>
+  async function fetchMockData() {
+    try {
+      const response = await fetch('mockhealthdata.json');
+      const data = await response.json();
+
+      document.querySelector('#steps').textContent = data.steps.toLocaleString();
+      document.querySelector('#sleep').textContent = `${data.sleep} hrs`;
+      document.querySelector('#calories').textContent = `${data.calories} kcal`;
+    } catch (error) {
+      console.error('Failed to fetch mock data:', error);
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    fetchMockData();
+    setInterval(fetchMockData, 10000);
+  });
+</script>
+
 </head>
 <body>
   <header>
@@ -132,9 +152,9 @@
       <div class="card activity-card">
         <h3>🚶️ Daily Activity</h3>
         <table class="stats-table">
-          <tr><td>Steps:</td><td id="steps">8,123</td></tr>
-          <tr><td>Sleep:</td><td id="sleep">6.5 hrs</td></tr>
-          <tr><td>Calories:</td><td id="calories">430 kcal</td></tr>
+          <tr><td>Steps:</td><td id="steps">-</td></tr>
+          <tr><td>Sleep:</td><td id="sleep">-</td></tr>
+          <tr><td>Calories:</td><td id="calories">-</td></tr>
         </table>
       </div>
 
