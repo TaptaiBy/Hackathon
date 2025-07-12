@@ -95,7 +95,7 @@ nav a {
 
 /* Background container for all three sections */
 .bg-group-exercise {
-  background: url('../assets/images/group-workout.jpg') center center/cover no-repeat;
+  background: url('assets/images/group-workout.jpg') center center/cover no-repeat;
   position: relative;
   z-index: 0;
 }
