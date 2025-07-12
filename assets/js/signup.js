@@ -1,5 +1,6 @@
 document.getElementById("signupForm").addEventListener("submit", async function (e) {
   e.preventDefault();
+  console.log("Form submitted"); 
 
   const fullName = document.getElementById("name").value;
   const idNumber = document.getElementById("id").value;
