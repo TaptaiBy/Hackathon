@@ -112,18 +112,19 @@
     .quests-card { grid-area: quests; }
   </style>
   <script>
-      async function fetchMockData() {
-    try {
-      const response = await fetch('assets/mock/mockhealthdata.json');
-      const data = await response.json();
+       async function fetchMockData() {
+      try {
+        const response = await fetch('assets/mock/mockhealthdata.json');
+        const data = await response.json();
 
-      document.querySelector('#steps').textContent = data.steps.toLocaleString();
-      document.querySelector('#sleep').textContent = `${data.sleep} hrs`;
-      document.querySelector('#calories').textContent = `${data.calories} kcal`;
-    } catch (error) {
-      console.error('Failed to fetch mock data:', error);
+        document.querySelector('#steps').textContent = data.steps.toLocaleString();
+        document.querySelector('#sleep').textContent = `${data.sleep} hrs`;
+        document.querySelector('#calories').textContent = `${data.calories} kcal`;
+      } catch (error) {
+        console.error('Failed to fetch mock data:', error);
+      }
     }
-  }
+
 
     function triggerSmartContract() {
       alert('Smart contract function triggered!');
