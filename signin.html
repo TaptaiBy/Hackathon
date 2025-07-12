@@ -7,57 +7,7 @@
   <link rel="stylesheet" href="signin.css" />
 </head>
   <style>
-  body, html {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  font-family: 'Segoe UI', sans-serif;
-}
 
-.bg-blur {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: url('assets/bg.jpg') no-repeat center center fixed;
-  background-size: cover;
-  filter: blur(8px);
-  z-index: -1;
-}
-
-.wrapper {
-  position: relative;
-  z-index: 1;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.hero {
-  background: rgba(0, 0, 0, 0.6);
-  padding: 3rem;
-  border-radius: 16px;
-  text-align: center;
-  color: white;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-}
-
-.btn.primary {
-  background-color: #FF00B4;
-  color: white;
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background 0.3s;
-}
-
-.btn.primary:hover {
-  background-color: #e600a8;
-}
     body {
     margin: 0;
     font-family: 'Segoe UI', sans-serif;
@@ -92,41 +42,42 @@
   }
 </style>
 
-<body>
-  <div class="bg-blur"></div> <!-- background layer -->
-  <div class="wrapper">
-    <section class="hero">
-      <h1>Login to ProofPulse</h1>
-      <p>Connect your wallet to continue.</p>
-      <button id="connectBtn" class="btn primary">Connect with MetaMask</button>
-      <p id="status"></p>
-    </section>
-  </div>
+ <section class="hero">
+    <h1>Login to ProofPulse</h1>
+    <p>Connect your wallet to continue.</p>
+    <button id="connectBtn" class="btn primary">Connect with MetaMask</button>
+    <p id="status"></p>
+  </section>
 
-  <script>
-    const connectBtn = document.getElementById('connectBtn');
-    const status = document.getElementById('status');
+ <script>
+  const connectBtn = document.getElementById('connectBtn');
+  const status = document.getElementById('status');
 
-    async function connectWallet() {
-      if (window.ethereum) {
-        try {
-          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-          const walletAddress = accounts[0];
-          status.textContent = `Connected: ${walletAddress}`;
-          setTimeout(() => {
-            window.location.href = "dashboard.html";
-          }, 1000);
-        } catch (error) {
-          status.textContent = 'Connection rejected.';
-          console.error(error);
-        }
-      } else {
-        status.textContent = 'MetaMask not detected. Please install it.';
+  async function connectWallet() {
+    if (window.ethereum) {
+      try {
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const walletAddress = accounts[0];
+        status.textContent = `Connected: ${walletAddress}`;
+
+        // ✅ Redirect to dashboard after login
+        setTimeout(() => {
+          window.location.href = "dashboard.html"; // change this if your dashboard file has a different name
+        }, 1000); // optional delay to show success message
+
+      } catch (error) {
+        status.textContent = 'Connection rejected.';
+        console.error(error);
       }
+    } else {
+      status.textContent = 'MetaMask not detected. Please install it.';
     }
+  }
 
-    connectBtn.addEventListener('click', connectWallet);
-  </script>
+  connectBtn.addEventListener('click', connectWallet);
+</script>
+
+
 </body>
 
 </html>
