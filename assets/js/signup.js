@@ -10,8 +10,9 @@ document.getElementById("signupForm").addEventListener("submit", async function 
   const policyValue = document.getElementById("policy-value").value;
 
   // 1. Simulate insurer validation (mock)
-  const response = await fetch("/mock-api/insurerMock.js"); // OR simulate in-place
-  const isValid = true; // Assume response returns `true` (Y)
+  const response = await fetch("assets/mock/insurer.json");
+  const data = await response.json();
+  const isValid = data.valid;
 
   // 2. If valid, connect MetaMask & interact with smart contract
   if (isValid) {
