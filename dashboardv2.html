@@ -30,12 +30,12 @@
     }
     .dashboard {
       display: grid;
-      grid-template-columns: 1.5fr 1fr;
+      grid-template-columns: 1fr 1fr 1fr;
       gap: 2rem;
       grid-template-areas:
-        "character metrics"
-        "activity rewards"
-        "quests quests";
+        "character character character"
+        "metrics activity rewards"
+        "quests quests quests";
     }
     .card {
       background: #fff;
@@ -79,7 +79,12 @@
       border-radius: 8px;
       margin-bottom: 0.5rem;
     }
-    .character-card { grid-area: character; padding: 2.5rem; font-size: 1.1rem; text-align: center; }
+    .character-card {
+      grid-area: character;
+      padding: 2.5rem;
+      font-size: 1.1rem;
+      text-align: center;
+    }
     .character-avatar {
       width: 120px;
       height: 120px;
