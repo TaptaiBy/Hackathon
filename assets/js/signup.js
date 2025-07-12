@@ -9,6 +9,8 @@ document.getElementById("signupForm").addEventListener("submit", async function 
   const insurer = document.getElementById("insurer").value;
   const policyNumber = document.getElementById("policy-number").value;
   const policyValue = document.getElementById("policy-value").value;
+  const CONTRACT_ABI = 
+  const CONTRACT_ADDRESS = 0xC18CcDab9BEbf12177EcC4742Ef83197a8fB27cf
 
   // 1. Simulate insurer validation (mock)
   const response = await fetch("assets/mock/insurer.json");
