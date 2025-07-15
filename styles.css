@@ -95,6 +95,20 @@ nav a {
   color: white;
 }
 
+.section h2 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.section h2 {
+  background: rgba(0, 0, 0, 0.3);
+  display: inline-block;
+  padding: 0.5rem 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
 /* Background container for all four sections */
 .bg-group-exercise {
   background: url('assets/images/group-workout.jpg') center center/cover no-repeat;
@@ -144,20 +158,6 @@ nav a {
 .content-wrapper {
   position: relative;
   z-index: 1;
-}
-
-.section h2 {
-  font-size: 2rem;
-  margin-bottom: 1rem;
-  text-align: center;
-}
-
-.section h2 {
-  background: rgba(0, 0, 0, 0.3);
-  display: inline-block;
-  padding: 0.5rem 1.5rem;
-  border-radius: 8px;
-  margin-bottom: 2rem;
 }
 
 footer {
