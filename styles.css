@@ -95,11 +95,17 @@ nav a {
   color: white;
 }
 
-/* Background container for all three sections */
+/* Background container for all four sections */
 .bg-group-exercise {
   background: url('assets/images/group-workout.jpg') center center/cover no-repeat;
   position: relative;
   z-index: 0;
+}
+
+.bg-group-exercise .section:not(:first-child) {
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  margin-top: 3rem;
+  padding-top: 3rem;
 }
 
 .bg-group-exercise::before {
