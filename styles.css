@@ -112,6 +112,7 @@ nav a {
 
 .bg-group-exercise .section {
   position: relative;
+  padding: 4rem 2rem;
   z-index: 1;
   color: white;
 }
