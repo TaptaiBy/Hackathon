@@ -160,13 +160,6 @@ nav a {
     width: 100%;
     max-width: 300px;
   }
-}
-
-.section.alt {
-  padding: 3rem 2rem;
-  text-align: center;
-  background: var(--color-bg-section);
-}
 
 footer {
   text-align: center;
@@ -176,7 +169,7 @@ footer {
 }
 
 .footer-links a {
-  color: var(--color-light-pink);
+  color: white;
   text-decoration: none;
   margin: 0 0.5rem;
 }
