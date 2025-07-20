@@ -630,7 +630,7 @@ document.getElementById("signupForm").addEventListener("submit", async function 
    },
    {
     "internalType": "uint256",
-    "name": "totalAct}];
+    "name": "totalAct;
   const CONTRACT_ADDRESS = "0x60c928ea4f6f73e129f0a9c2d940bc3dbb721250";
 
   // 1. Simulate insurer validation (mock)
