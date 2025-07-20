@@ -60,7 +60,7 @@ document.getElementById("signupForm").addEventListener("submit", async function 
       const web3 = new Web3(window.ethereum);
       const contract = new web3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
 
-      await contract.methods.createHealthID(account, policyNumber, insurer).send({ from: account });
+      await contract.methods.mintHealthID(account,fullName,dob,policyNumber,policyValue,insurer,).send({ from: account });
 
       alert("HealthID created successfully!");
     } else {
