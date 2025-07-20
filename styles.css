@@ -60,10 +60,6 @@ nav a {
   transition: all 0.3s ease;
 }
 
-.auth-buttons .btn:hover {
-  background: rgba(255,255,255,0.2);
-}
-
 .auth-buttons .primary {
   background: white;
   color: var(--color-hot-pink);
