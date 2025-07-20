@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Proofpulse</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard | ProofPulse</title>
   <link rel="stylesheet" href="dashboard.css" />
   <style>
     body {
@@ -12,6 +12,7 @@
       background: linear-gradient(to right, #0000FF, #5C6EFF);
       color: #fff;
     }
+
     header {
       display: flex;
       justify-content: space-between;
@@ -19,9 +20,11 @@
       padding: 1rem 2rem;
       background-color: #FF00B4;
     }
+
     .logo img {
       height: 50px;
     }
+
     .redeem-btn {
       background-color: #fff;
       color: #FF00B4;
@@ -32,14 +35,17 @@
       cursor: pointer;
       transition: background 0.3s;
     }
+
     .redeem-btn:hover {
       background-color: #ffe6f0;
     }
+
     .container {
       padding: 2rem;
       max-width: 1200px;
       margin: auto;
     }
+
     .dashboard {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
@@ -49,6 +55,7 @@
         "metrics activity rewards"
         "quests quests quests";
     }
+
     .card {
       background: #fff;
       color: #222;
@@ -57,33 +64,41 @@
       box-shadow: 0 6px 20px rgba(0,0,0,0.1);
       transition: transform 0.2s;
     }
+
     .card:hover {
       transform: scale(1.02);
     }
+
     .card h3 {
       margin-top: 0;
     }
+
     .stats-table {
       width: 100%;
       border-collapse: collapse;
     }
+
     .stats-table td {
       padding: 0.5rem 0;
     }
+
     .progress {
       background: #eee;
       border-radius: 8px;
       overflow: hidden;
       margin-top: 0.5rem;
     }
+
     .progress-bar {
       height: 10px;
       background: #FF00B4;
     }
+
     .quests ul {
       list-style: none;
       padding: 0;
     }
+
     .quests li {
       background: #f1f1f1;
       color: #333;
@@ -91,12 +106,13 @@
       border-radius: 8px;
       margin-bottom: 0.5rem;
     }
-    .character-card {
-      grid-area: character;
-      padding: 2.5rem;
-      font-size: 1.1rem;
-      text-align: center;
-    }
+
+    .character-card { grid-area: character; text-align: center; }
+    .metrics-card   { grid-area: metrics; }
+    .activity-card  { grid-area: activity; }
+    .rewards-card   { grid-area: rewards; }
+    .quests-card    { grid-area: quests; }
+
     .character-avatar {
       width: 120px;
       height: 120px;
@@ -105,10 +121,6 @@
       object-fit: cover;
       box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
-    .metrics-card { grid-area: metrics; }
-    .activity-card { grid-area: activity; }
-    .rewards-card { grid-area: rewards; }
-    .quests-card { grid-area: quests; }
 
     input#activityHash {
       padding: 0.5rem;
@@ -119,26 +131,6 @@
       font-size: 1rem;
     }
   </style>
-
-  <script>
-    async function fetchMockData() {
-      try {
-        const response = await fetch('assets/mock/mockhealthdata.json');
-        const data = await response.json();
-
-        document.querySelector('#steps').textContent = data.steps.toLocaleString();
-        document.querySelector('#sleep').textContent = `${data.sleep} hrs`;
-        document.querySelector('#calories').textContent = `${data.calories} kcal`;
-      } catch (error) {
-        console.error('Failed to fetch mock data:', error);
-      }
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      fetchMockData();
-      setInterval(fetchMockData, 10000);
-    });
-  </script>
 </head>
 
 <body>
@@ -148,9 +140,10 @@
         <img src="assets/images/logobw.png" alt="Proofpulse" />
       </a>
     </div>
-    <div>
+    <div style="display: flex; align-items: center; gap: 1rem;">
+      <span id="walletAddress" style="font-weight: bold;"></span>
       <button class="redeem-btn" onclick="triggerSmartContract()">🎁 Redeem</button>
-      <a href="index.html" style="color: white; margin-left: 1rem;">Logout</a>
+      <a href="index.html" style="color: white;">Logout</a>
     </div>
   </header>
 
@@ -216,7 +209,7 @@
     </div>
   </div>
 
-  <!-- Ethers + Smart Contract -->
+  <!-- Ethers + Logic -->
   <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
   <script>
     const REWARD_ENGINE_ADDRESS = "0x38708f94ae885618d72f4151ef420cf2eb5eca7b";
@@ -242,6 +235,19 @@
       }
     ];
 
+    async function fetchMockData() {
+      try {
+        const response = await fetch('assets/mock/mockhealthdata.json');
+        const data = await response.json();
+
+        document.querySelector('#steps').textContent = data.steps.toLocaleString();
+        document.querySelector('#sleep').textContent = `${data.sleep} hrs`;
+        document.querySelector('#calories').textContent = `${data.calories} kcal`;
+      } catch (error) {
+        console.error('Failed to fetch mock data:', error);
+      }
+    }
+
     async function triggerSmartContract() {
       if (!window.ethereum) {
         alert("Please install MetaMask.");
@@ -258,9 +264,13 @@
 
       try {
         const provider = new ethers.providers.Web3Provider(window.ethereum);
-        await provider.send("eth_requestAccounts", []);
-        const signer = provider.getSigner();
+        const accounts = await provider.listAccounts();
+        if (accounts.length === 0) {
+          alert("Please reconnect MetaMask to continue.");
+          return;
+        }
 
+        const signer = provider.getSigner();
         const logger = new ethers.Contract(ACTIVITY_LOGGER_ADDRESS, loggerAbi, provider);
         const eligible = await logger.checkEligibility(ACTIVITY_HASH);
 
@@ -282,6 +292,27 @@
         alert("❌ Error: " + (err.reason || err.message));
       }
     }
+
+    window.addEventListener("DOMContentLoaded", async () => {
+      fetchMockData();
+      setInterval(fetchMockData, 10000);
+
+      // Wallet address display
+      if (window.ethereum) {
+        try {
+          const provider = new ethers.providers.Web3Provider(window.ethereum);
+          const accounts = await provider.listAccounts();
+          if (accounts.length > 0) {
+            const short = `${accounts[0].slice(0, 6)}...${accounts[0].slice(-4)}`;
+            document.getElementById("walletAddress").textContent = `🦊 ${short}`;
+          } else {
+            document.getElementById("walletAddress").textContent = "Not connected";
+          }
+        } catch (err) {
+          console.error("Wallet display error:", err);
+        }
+      }
+    });
   </script>
 </body>
 </html>
