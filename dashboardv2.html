@@ -109,7 +109,17 @@
     .activity-card { grid-area: activity; }
     .rewards-card { grid-area: rewards; }
     .quests-card { grid-area: quests; }
+
+    input#activityHash {
+      padding: 0.5rem;
+      border-radius: 8px;
+      border: none;
+      width: 100%;
+      margin-top: 0.5rem;
+      font-size: 1rem;
+    }
   </style>
+
   <script>
     async function fetchMockData() {
       try {
@@ -130,6 +140,7 @@
     });
   </script>
 </head>
+
 <body>
   <header>
     <div class="logo">
@@ -143,10 +154,10 @@
     </div>
   </header>
 
-  <!-- Wallet Connect Panel -->
-  <div style="padding: 1rem 2rem; display: flex; justify-content: flex-end; align-items: center; gap: 1rem;">
-    <button id="connectBtn" class="redeem-btn">🔌 Connect Wallet</button>
-    <span id="walletStatus" style="font-weight: bold;"></span>
+  <!-- Activity Hash Input -->
+  <div style="padding: 1rem 2rem;">
+    <label for="activityHash" style="font-weight: bold;">Enter Activity Hash:</label><br />
+    <input id="activityHash" type="text" placeholder="0x..." />
   </div>
 
   <div class="container">
@@ -205,11 +216,11 @@
     </div>
   </div>
 
-  <!-- Ethers & Smart Contract -->
+  <!-- Ethers + Smart Contract -->
   <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
   <script>
     const REWARD_ENGINE_ADDRESS = "0x38708f94ae885618d72f4151ef420cf2eb5eca7b";
-    const ACTIVITY_LOGGER_ADDRESS = "0x38708f94ae885618d72f4151ef420cf2eb5eca7b"; // Update if different
+    const ACTIVITY_LOGGER_ADDRESS = "0x38708f94ae885618d72f4151ef420cf2eb5eca7b";
 
     const rewardEngineAbi = [
       {
@@ -231,32 +242,25 @@
       }
     ];
 
-    let provider, signer, userAddress;
-
-    async function connectWallet() {
+    async function triggerSmartContract() {
       if (!window.ethereum) {
         alert("Please install MetaMask.");
         return;
       }
 
-      provider = new ethers.providers.Web3Provider(window.ethereum);
-      await provider.send("eth_requestAccounts", []);
-      signer = provider.getSigner();
-      userAddress = await signer.getAddress();
+      const input = document.getElementById("activityHash");
+      const ACTIVITY_HASH = input.value.trim();
 
-      document.getElementById("walletStatus").textContent = `Connected: ${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`;
-    }
-
-    async function triggerSmartContract() {
-      if (!signer || !userAddress) {
-        alert("Please connect your wallet first.");
+      if (!ethers.utils.isHexString(ACTIVITY_HASH) || ACTIVITY_HASH.length !== 66) {
+        alert("❌ Please enter a valid bytes32 activity hash.");
         return;
       }
 
-      // Replace with a real activity hash
-      const ACTIVITY_HASH = "0x4d4f4348495f4452494e4b5f54574f4c4954455253deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef";
-
       try {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+        const signer = provider.getSigner();
+
         const logger = new ethers.Contract(ACTIVITY_LOGGER_ADDRESS, loggerAbi, provider);
         const eligible = await logger.checkEligibility(ACTIVITY_HASH);
 
@@ -268,7 +272,8 @@
         const contract = new ethers.Contract(REWARD_ENGINE_ADDRESS, rewardEngineAbi, signer);
         const tx = await contract.redeemPoints(ACTIVITY_HASH);
         console.log("Tx sent:", tx.hash);
-        alert("🎁 Redeem submitted!");
+
+        alert(`🎁 Redeem submitted!\n\n📎 View on Etherscan:\nhttps://sepolia.etherscan.io/tx/${tx.hash}`);
 
         await tx.wait();
         alert("✅ Reward successfully redeemed!");
@@ -277,8 +282,6 @@
         alert("❌ Error: " + (err.reason || err.message));
       }
     }
-
-    document.getElementById("connectBtn").addEventListener("click", connectWallet);
   </script>
 </body>
 </html>
