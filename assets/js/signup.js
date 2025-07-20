@@ -647,7 +647,7 @@ document.getElementById("signupForm").addEventListener("submit", async function 
       const web3 = new Web3(window.ethereum);
       const contract = new web3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
 
-      await contract.methods.MINTHEALTHID(account,fullName,dob,policyNumber,parseInt(policyValue),"0x0000000000000000000000000000000000000000","https://example.com/metadata.json").send({ from: account });
+      await contract.methods.mintHealthID(account,fullName,dob,policyNumber,parseInt(policyValue),"0x0000000000000000000000000000000000000000","https://example.com/metadata.json").send({ from: account });
 
       alert("HealthID created successfully!");
     } else {
