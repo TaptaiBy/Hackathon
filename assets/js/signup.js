@@ -9,82 +9,42 @@ document.getElementById("signupForm").addEventListener("submit", async function 
   const insurer = document.getElementById("insurer").value;
   const policyNumber = document.getElementById("policy-number").value;
   const policyValue = document.getElementById("policy-value").value.toString;
-  const CONTRACT_ABI = [{
-  "inputs": [],
-  "name": "reclaimUnclaimed",
-  "outputs": [],
-  "stateMutability": "nonpayable",
-  "type": "function"
- },
- {
-  "inputs": [
-   {
-    "internalType": "string",
-    "name": "_guess",
-    "type": "string"
-   }
-  ],
-  "name": "submitAnswer",
-  "outputs": [],
-  "stateMutability": "nonpayable",
-  "type": "function"
- },
- {
-  "inputs": [
-   {
-    "internalType": "string",
-    "name": "_answer",
-    "type": "string"
-   }
-  ],
-  "stateMutability": "payable",
-  "type": "constructor"
- },
- {
-  "stateMutability": "payable",
-  "type": "receive"
- },
- {
-  "inputs": [],
-  "name": "claimed",
-  "outputs": [
-   {
-    "internalType": "bool",
-    "name": "",
-    "type": "bool"
-   }
-  ],
-  "stateMutability": "view",
-  "type": "function"
- },
- {
-  "inputs": [],
-  "name": "getContractBalance",
-  "outputs": [
-   {
-    "internalType": "uint256",
-    "name": "",
-    "type": "uint256"
-   }
-  ],
-  "stateMutability": "view",
-  "type": "function"
- },
- {
-  "inputs": [],
-  "name": "owner",
-  "outputs": [
-   {
-    "internalType": "address",
-    "name": "",
-    "type": "address"
-   }
-  ],
-  "stateMutability": "view",
-  "type": "function"
- }
+  const CONTRACT_ABI = [
+	{
+		"inputs": [],
+		"name": "latestRoundData",
+		"outputs": [
+			{
+				"internalType": "uint80",
+				"name": "roundId",
+				"type": "uint80"
+			},
+			{
+				"internalType": "int256",
+				"name": "price",
+				"type": "int256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "startedAt",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "updatedAt",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint80",
+				"name": "answeredInRound",
+				"type": "uint80"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
 ];
-  const CONTRACT_ADDRESS = "0xC18CcDab9BEbf12177EcC4742Ef83197a8fB27cf";
+  const CONTRACT_ADDRESS = "0x9948f5e63cc55adeafe5259135e2c8623511501a";
 
   // 1. Simulate insurer validation (mock)
   const response = await fetch("assets/mock/insurer.json");
