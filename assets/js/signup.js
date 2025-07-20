@@ -3,9 +3,7 @@ document.getElementById("signupForm").addEventListener("submit", async function 
   console.log("Form submitted"); 
 
   const fullName = document.getElementById("name").value;
-  const idNumber = document.getElementById("id").value;
   const dob = document.getElementById("dob").value;
-  const device = document.getElementById("device").value;
   const insurer = document.getElementById("insurer").value;
   const policyNumber = document.getElementById("policy-number").value;
   const policyValue = document.getElementById("policy-value").value.toString;
