@@ -12,7 +12,7 @@
 
 body {
   margin: 0;
-  font-family: 'Segoe UI', sans-serif;
+  font-family: 'Poppins', sans-serif;
   color: var(--color-text-dark);
   background: var(--color-bg-light);
 }
@@ -57,6 +57,11 @@ nav a {
   font-weight: 500;
   border: 2px solid white;
   color: white;
+  transition: all 0.3s ease;
+}
+
+.auth-buttons .btn:hover {
+  background: rgba(255,255,255,0.2);
 }
 
 .auth-buttons .primary {
