@@ -202,13 +202,6 @@ footer {
 
 /* Sign up */
 
-body {
-  background: linear-gradient(to bottom right, #0000FF, #FF00B4); /* ProofPulse gradient */
-  font-family: 'Segoe UI', sans-serif;
-  margin: 0;
-  padding: 0;
-}
-
 .signup-container {
   max-width: 500px;
   margin: 5rem auto;
