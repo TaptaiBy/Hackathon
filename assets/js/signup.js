@@ -4,24 +4,28 @@ const insurerAddresses = {
   prudential: "0xabcd1234567890abcdef1234567890abcdef1234",
   metlife: "0x9876543210abcdef9876543210abcdef98765432"
 };
-console.log("Wallet Address Mapped");
 
-document.getElementById("signupForm").addEventListener("submit", async function (event) {
-event.preventDefault();
+document.getElementById("signupForm").addEventListener("submit", async function (event) {event.preventDefault();
   console.log("Form submitted");
   const fullName = document.getElementById("name").value;
   const dob = document.getElementById("dob").value;
-  const insurer = document.getElementById("insurer").value;
   const policyNumber = document.getElementById("policy-number").value;
   const policyValue = document.getElementById("policy-value").value;
+  const insurerKey = document.getElementById("insurer").value.toLowerCase();
+  const insurerAddress = insurerAddresses[insurerKey];
 
-	// Validate insurer selection
-  if (!insurerKey || !insurerAddresses[insurerKey]) {
-    alert("Please select a valid insurer");
-    return;
+// Validate insurer selection
+if (!insurerKey || !insurerAddresses[insurerKey]) {
+  alert("Please select a valid insurer");
+  return;
   }
 
-  const insurerAddress = insurerAddresses[insurerKey];
+// Validate policy value
+  const policyValue = parseInt(policyValueInput, 10);
+  if (isNaN(policyValue)) {
+    alert("Please enter a valid Policy Value (number)");
+    return;
+  }
   const CONTRACT_ABI = [
 	{
 		"inputs": [
@@ -1055,6 +1059,7 @@ event.preventDefault();
 	}
 ];
   const CONTRACT_ADDRESS = "0x60c928ea4f6f73e129f0a9c2d940bc3dbb721250";
+  console.log(`Selected insurer: ${insurerKey}, Wallet: ${insurerAddress}`);
 
   // 1. Simulate insurer validation (mock)
   const response = await fetch("assets/mock/insurer.json");
