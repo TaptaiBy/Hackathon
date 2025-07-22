@@ -1,12 +1,28 @@
-document.getElementById("signupForm").addEventListener("submit", async function (e) {
-  e.preventDefault();
-  console.log("Form submitted"); 
+// Map insurer names to their Ethereum wallet addresses
+const insurerAddresses = {
+  aia: "0x1234567890abcdef1234567890abcdef12345678",
+  prudential: "0xabcd1234567890abcdef1234567890abcdef1234",
+  metlife: "0x9876543210abcdef9876543210abcdef98765432"
+};
+console.log("Wallet Address Mapped");
 
+document.getElementById("signupForm").addEventListener("submit", async function (event) {
+event.preventDefault();
+  console.log("Form submitted");
+										     
   const fullName = document.getElementById("name").value;
   const dob = document.getElementById("dob").value;
   const insurer = document.getElementById("insurer").value;
   const policyNumber = document.getElementById("policy-number").value;
   const policyValue = document.getElementById("policy-value").value;
+
+	// Validate insurer selection
+  if (!insurerKey || !insurerAddresses[insurerKey]) {
+    alert("Please select a valid insurer");
+    return;
+  }
+
+  const insurerAddress = insurerAddresses[insurerKey];
   const CONTRACT_ABI = [
 	{
 		"inputs": [
