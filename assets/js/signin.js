@@ -1,4 +1,4 @@
-import { getContract, getProviderAndSigner } from "../../contracts/index.js";
+import { getContract, getProviderAndSigner } from "contracts/index.js";
 
 document.getElementById("connectBtn").addEventListener("click", async () => {
   const status = document.getElementById("status");
