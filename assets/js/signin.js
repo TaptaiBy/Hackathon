@@ -1,4 +1,4 @@
-import { getContract, getProviderAndSigner } from "../../contracts/index.js";
+import { getContract, getProviderAndSigner } from "contracts/index.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   console.log("✅ DOM loaded");
