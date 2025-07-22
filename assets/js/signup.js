@@ -9,7 +9,6 @@ console.log("Wallet Address Mapped");
 document.getElementById("signupForm").addEventListener("submit", async function (event) {
 event.preventDefault();
   console.log("Form submitted");
-										     
   const fullName = document.getElementById("name").value;
   const dob = document.getElementById("dob").value;
   const insurer = document.getElementById("insurer").value;
