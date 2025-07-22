@@ -5,11 +5,10 @@ document.getElementById("signupForm").addEventListener("submit", async function 
   const fullName = document.getElementById("name").value;
   const dob = document.getElementById("dob").value;
   const policyNumber = document.getElementById("policy-number").value;
-  const policyValue = document.getElementById("policy-value").value;
+  const policyValue = parseInt(document.getElementById("policy-value").value, 10);
   const insurerKey = document.getElementById("insurer").value.toLowerCase();
 
   // Validate policy value
-  policyValue = parseInt(policyValue, 10);
   if (isNaN(policyValue)) {
     alert("Please enter a valid Policy Value (number)");
     return;
