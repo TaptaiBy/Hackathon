@@ -9,7 +9,7 @@ document.getElementById("signupForm").addEventListener("submit", async function 
   const insurerKey = document.getElementById("insurer").value.toLowerCase();
 
   // Validate policy value
-  const policyValue = parseInt(policyValueInput, 10);
+  policyValue = parseInt(policyValueInput, 10);
   if (isNaN(policyValue)) {
     alert("Please enter a valid Policy Value (number)");
     return;
