@@ -41,7 +41,12 @@
       <input type="date" id="dob" name="dob" required />
 
       <label for="insurer">Insurer:</label>
-      <input type="text" id="insurer" name="insurer" required />
+      <select id="insurer" name="insurer" required>
+        <option value="">-- Select Insurer --</option>
+        <option value="aia">AIA</option>
+        <option value="prudential">Prudential</option>
+        <option value="metlife">MetLife</option>
+      </select>
 
       <label for="policy-number">Policy Number:</label>
       <input type="text" id="policy-number" name="policy-number" required />
