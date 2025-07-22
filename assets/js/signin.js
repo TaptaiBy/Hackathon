@@ -38,3 +38,4 @@ document.getElementById("connectBtn").addEventListener("click", async () => {
     status.textContent = `❌ Login failed: ${err.message}`;
   }
 });
+
