@@ -67,4 +67,4 @@ document.getElementById("signupForm").addEventListener("submit", async function 
   console.error("Error during signup:", err);
   alert(`Something went wrong: ${err.message}`);
 }
-};
+});
