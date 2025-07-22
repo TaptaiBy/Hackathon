@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login | ProofPulse</title>
   <link rel="stylesheet" href="styles.css" />
-  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <style>
     body {
       margin: 0;
@@ -39,6 +38,11 @@
     .btn.primary:hover {
       background-color: #e600a8;
     }
+
+    #status {
+      margin-top: 1rem;
+      font-size: 1rem;
+    }
   </style>
 </head>
 <body>
@@ -49,49 +53,7 @@
     <p id="status"></p>
   </section>
 
-  <script>
-    const connectBtn = document.getElementById('connectBtn');
-    const status = document.getElementById('status');
-
-    // Replace this with your actual NFT contract address
-    const nftContractAddress = "0xYourNFTContractAddressHere";
-
-    // Minimal ABI for ERC-721 balanceOf
-    const nftAbi = [
-      "function balanceOf(address owner) view returns (uint256)"
-    ];
-
-    async function connectWallet() {
-      if (!window.ethereum) {
-        status.textContent = "MetaMask not detected. Please install it.";
-        return;
-      }
-
-      try {
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        await provider.send("eth_requestAccounts", []);
-        const signer = provider.getSigner();
-        const userAddress = await signer.getAddress();
-
-        // Connect to NFT contract
-        const nftContract = new ethers.Contract(nftContractAddress, nftAbi, provider);
-        const balance = await nftContract.balanceOf(userAddress);
-
-        if (balance.gt(0)) {
-          status.textContent = `✅ Access granted: ${userAddress}`;
-          setTimeout(() => {
-            window.location.href = "dashboard.html";
-          }, 1000);
-        } else {
-          status.textContent = "❌ Access denied: You do not own the required NFT.";
-        }
-      } catch (error) {
-        console.error(error);
-        status.textContent = "❌ Wallet connection failed.";
-      }
-    }
-
-    connectBtn.addEventListener('click', connectWallet);
-  </script>
+  <!-- ✅ Link your JS logic -->
+  <script type="module" src="./login.js"></script>
 </body>
 </html>
