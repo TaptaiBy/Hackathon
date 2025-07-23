@@ -219,6 +219,13 @@
       for (let i = 0; i < hashes.length; i++) {
         const activity = await contract.getActivity(hashes[i]);
         const type = activity[2].toLowerCase();
+console.log("Activity:", {
+  raw: activity[2],
+  normalized: type,
+  timestamp: activity[1],
+  date: new Date(activity[1] * 1000).toISOString()
+});
+
         const dateStr = new Date(activity[1] * 1000).toISOString().split("T")[0];
         streakCounts[type] = (streakCounts[type] || 0) + 1;
         if (dateStr === today) completedToday.add(type);
