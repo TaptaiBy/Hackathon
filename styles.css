@@ -130,6 +130,14 @@ nav a {
   margin-bottom: 2rem;
 }
 
+.step i {
+  font-size: 3rem;       /* Increase icon size */
+  color: white;          /* Match your text color */
+  margin-bottom: 1rem;   /* Space below icon */
+  display: block;
+  text-align: center;
+}
+
 /* Background container for all four sections */
 .bg-group-exercise {
   background: url('assets/images/group-workout.jpg') center center/cover no-repeat;
