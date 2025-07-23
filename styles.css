@@ -63,6 +63,7 @@ nav a {
 
 .sign-up-btn {
   background-color: white;
+  text-decoration: none;
   color: blue;
   border: none;
   padding: 8px 16px;
