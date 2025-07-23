@@ -189,7 +189,7 @@
   <script>
     const contractAddress = "0x871Ee5907cd8b60e298CAD61fFcf74d55262dfb7";
     const contractABI = [
-      "function getUserVerifiedActivities(address user) external view returns (bytes32[] memory)",
+      "function getUserActivities(address user) external view returns (bytes32[] memory)",
       "function getActivity(bytes32 activityHash) external view returns (tuple(bytes32,uint256,string,address,bool,bool))"
     ];
 
@@ -211,24 +211,20 @@
       const user = await signer.getAddress();
       const contract = new ethers.Contract(contractAddress, contractABI, provider);
 
-      const hashes = await contract.getUserVerifiedActivities(user);
-      const today = new Date().toISOString().split("T")[0];
-      const streakCounts = {};
+      const hashes = await contract.getUserActivities(user);
+      const today = new Date().toLocaleDateString("en-CA");
       const completedToday = new Set();
+      const streakCounts = {};
 
       for (let i = 0; i < hashes.length; i++) {
         const activity = await contract.getActivity(hashes[i]);
         const type = activity[2].toLowerCase();
-console.log("Activity:", {
-  raw: activity[2],
-  normalized: type,
-  timestamp: activity[1],
-  date: new Date(activity[1] * 1000).toISOString()
-});
+        const date = new Date(activity[1] * 1000).toLocaleDateString("en-CA");
 
-        const dateStr = new Date(activity[1] * 1000).toISOString().split("T")[0];
         streakCounts[type] = (streakCounts[type] || 0) + 1;
-        if (dateStr === today) completedToday.add(type);
+        if (date === today) {
+          completedToday.add(type);
+        }
       }
 
       const questList = document.getElementById("daily-quests");
@@ -238,18 +234,18 @@ console.log("Activity:", {
         const li = document.createElement("li");
         li.innerHTML = `
           <div style="
-            background: ${done ? '#d1e7dd' : '#f1f1f1'};
-            color: ${done ? '#155724' : '#333'};
+            background: #fff;
             padding: 0.75rem 1rem;
             border-radius: 8px;
             margin-bottom: 0.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            color: #222;
             font-weight: 500;
           ">
             <span>⚡ ${label}</span>
-            ${done ? '✅' : ''}
+            ${done ? '<span style="color: green;">completed</span>' : ''}
           </div>
         `;
         questList.appendChild(li);
