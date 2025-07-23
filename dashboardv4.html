@@ -189,18 +189,11 @@
   <script>
     const contractAddress = "0x871Ee5907cd8b60e298CAD61fFcf74d55262dfb7";
     const contractABI = [
-      "function getUserActivities(address user) external view returns (bytes32[] memory)",
+      "function getUserVerifiedActivities(address user) external view returns (bytes32[] memory)",
       "function getActivity(bytes32 activityHash) external view returns (tuple(bytes32,uint256,string,address,bool,bool))"
     ];
 
-    const questMap = {
-      walk: "walking",
-      run30min: "run30min",
-      run45min: "run45min",
-      run5k: "run5k",
-      run10k: "run10k",
-      gym_checkin: "gym_checkin"
-    };
+    const questTypes = ["walk", "run30min", "run45min", "run5k", "run10k", "gym_checkin"];
 
     async function loadDashboardData() {
       if (!window.ethereum) return;
@@ -211,41 +204,38 @@
       const user = await signer.getAddress();
       const contract = new ethers.Contract(contractAddress, contractABI, provider);
 
-      const hashes = await contract.getUserActivities(user);
-      const today = new Date().toLocaleDateString("en-CA");
-      const completedToday = new Set();
+      const hashes = await contract.getUserVerifiedActivities(user);
+      const today = new Date().toISOString().split("T")[0];
       const streakCounts = {};
+      const completedToday = new Set();
 
       for (let i = 0; i < hashes.length; i++) {
         const activity = await contract.getActivity(hashes[i]);
-        const type = activity[2].toLowerCase();
-        const date = new Date(activity[1] * 1000).toLocaleDateString("en-CA");
-
+        const type = activity[2];
+        const dateStr = new Date(activity[1] * 1000).toISOString().split("T")[0];
         streakCounts[type] = (streakCounts[type] || 0) + 1;
-        if (date === today) {
-          completedToday.add(type);
-        }
+        if (dateStr === today) completedToday.add(type);
       }
 
       const questList = document.getElementById("daily-quests");
       questList.innerHTML = "";
-      for (const [label, type] of Object.entries(questMap)) {
-        const done = completedToday.has(type.toLowerCase());
+      for (const type of questTypes) {
+        const done = completedToday.has(type);
         const li = document.createElement("li");
         li.innerHTML = `
           <div style="
-            background: #fff;
+            background: ${done ? '#d1e7dd' : '#f1f1f1'};
+            color: ${done ? '#155724' : '#333'};
             padding: 0.75rem 1rem;
             border-radius: 8px;
             margin-bottom: 0.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            color: #222;
             font-weight: 500;
           ">
-            <span>⚡ ${label}</span>
-            ${done ? '<span style="color: green;">completed</span>' : ''}
+            <span>⚡ ${type}</span>
+            ${done ? '✅' : ''}
           </div>
         `;
         questList.appendChild(li);
