@@ -49,20 +49,31 @@ nav a {
   font-weight: 500;
 }
 
-.auth-buttons .btn {
-  margin-left: 1rem;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  text-decoration: none;
-  font-weight: 500;
-  border: 2px solid white;
+.nav-link {
   color: white;
-  transition: all 0.3s ease;
+  text-decoration: none;
+  margin-right: 20px;
+  font-size: 16px;
+  cursor: pointer;
 }
 
-.auth-buttons .primary {
-  background: white;
-  color: var(--color-deep-blue);
+.nav-link:hover {
+  text-decoration: underline;
+}
+
+.sign-up-btn {
+  background-color: white;
+  color: blue;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.sign-up-btn:hover {
+  opacity: 0.9;
 }
 
 .hero {
