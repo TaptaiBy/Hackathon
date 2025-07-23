@@ -81,17 +81,6 @@
       height: 10px;
       background: #FF00B4;
     }
-    .quests ul {
-      list-style: none;
-      padding: 0;
-    }
-    .quests li {
-      background: #f1f1f1;
-      color: #333;
-      padding: 0.75rem;
-      border-radius: 8px;
-      margin-bottom: 0.5rem;
-    }
     .character-card {
       grid-area: character;
       padding: 2.5rem;
@@ -186,14 +175,7 @@
 
       <div class="card quests-card quests">
         <h3>🚀 Daily Quests</h3>
-        <ul>
-          <li>⚡ walk</li>
-          <li>⚡ run30min</li>
-          <li>⚡ run45min</li>
-          <li>⚡ run5k</li>
-          <li>⚡ run10k</li>
-          <li>⚡ gym_checkin</li>
-        </ul>
+        <ul id="daily-quests" style="list-style: none; padding: 0; margin: 0;"></ul>
       </div>
 
       <div class="card quests-card" style="grid-area: streaks;">
@@ -211,7 +193,9 @@
       "function getActivity(bytes32 activityHash) external view returns (tuple(bytes32,uint256,string,address,bool,bool))"
     ];
 
-    async function loadActivityStreaks() {
+    const questTypes = ["walk", "run30min", "run45min", "run5k", "run10k", "gym_checkin"];
+
+    async function loadDashboardData() {
       if (!window.ethereum) return;
 
       const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -221,17 +205,44 @@
       const contract = new ethers.Contract(contractAddress, contractABI, provider);
 
       const hashes = await contract.getUserVerifiedActivities(user);
-      const streakEl = document.getElementById('streaks');
+      const today = new Date().toISOString().split("T")[0];
       const streakCounts = {};
+      const completedToday = new Set();
 
-      streakEl.innerHTML = "";
-
-      for (let i = hashes.length - 1; i >= 0; i--) {
+      for (let i = 0; i < hashes.length; i++) {
         const activity = await contract.getActivity(hashes[i]);
         const type = activity[2];
+        const dateStr = new Date(activity[1] * 1000).toISOString().split("T")[0];
         streakCounts[type] = (streakCounts[type] || 0) + 1;
+        if (dateStr === today) completedToday.add(type);
       }
 
+      const questList = document.getElementById("daily-quests");
+      questList.innerHTML = "";
+      for (const type of questTypes) {
+        const done = completedToday.has(type);
+        const li = document.createElement("li");
+        li.innerHTML = `
+          <div style="
+            background: ${done ? '#d1e7dd' : '#f1f1f1'};
+            color: ${done ? '#155724' : '#333'};
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 500;
+          ">
+            <span>⚡ ${type}</span>
+            ${done ? '✅' : ''}
+          </div>
+        `;
+        questList.appendChild(li);
+      }
+
+      const streakEl = document.getElementById('streaks');
+      streakEl.innerHTML = "";
       for (const [type, count] of Object.entries(streakCounts)) {
         const li = document.createElement("li");
         li.textContent = `${type}: 🔥 ${count} logs`;
@@ -242,7 +253,7 @@
     window.addEventListener("DOMContentLoaded", () => {
       fetchMockData();
       setInterval(fetchMockData, 10000);
-      loadActivityStreaks();
+      loadDashboardData();
     });
   </script>
 </body>
