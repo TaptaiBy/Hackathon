@@ -193,7 +193,14 @@
       "function getActivity(bytes32 activityHash) external view returns (tuple(bytes32,uint256,string,address,bool,bool))"
     ];
 
-    const questTypes = ["walk", "run30min", "run45min", "run5k", "run10k", "gym_checkin"];
+    const questMap = {
+      walk: "walking",
+      run30min: "run30min",
+      run45min: "run45min",
+      run5k: "run5k",
+      run10k: "run10k",
+      gym_checkin: "gym_checkin"
+    };
 
     async function loadDashboardData() {
       if (!window.ethereum) return;
@@ -211,7 +218,7 @@
 
       for (let i = 0; i < hashes.length; i++) {
         const activity = await contract.getActivity(hashes[i]);
-        const type = activity[2];
+        const type = activity[2].toLowerCase();
         const dateStr = new Date(activity[1] * 1000).toISOString().split("T")[0];
         streakCounts[type] = (streakCounts[type] || 0) + 1;
         if (dateStr === today) completedToday.add(type);
@@ -219,8 +226,8 @@
 
       const questList = document.getElementById("daily-quests");
       questList.innerHTML = "";
-      for (const type of questTypes) {
-        const done = completedToday.has(type);
+      for (const [label, type] of Object.entries(questMap)) {
+        const done = completedToday.has(type.toLowerCase());
         const li = document.createElement("li");
         li.innerHTML = `
           <div style="
@@ -234,7 +241,7 @@
             align-items: center;
             font-weight: 500;
           ">
-            <span>⚡ ${type}</span>
+            <span>⚡ ${label}</span>
             ${done ? '✅' : ''}
           </div>
         `;
