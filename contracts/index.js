@@ -6,7 +6,7 @@ import RewardEngineABI from "/workspaces/Hackathon/contracts/RewardEngine.json";
 import RPMABI from "/workspaces/Hackathon/contracts/RewardPoolManager.json";
 
 const addresses = {
-  ActivityLogger: "0x991002ac3699ad5eb20494ae496a86a01ecb834c",  // replace with actual deployed addresses
+  ActivityLogger: "0x4e76CB15C8A88a47e5210bf4b1ECE6A9036894ef",  // replace with actual deployed addresses
   HealthID: "0x60c928ea4f6f73e129f0a9c2d940bc3dbb721250",
   PriceOracle: "0xfda8f534cc264f711b56975065338e3605b08dc8",
   RewardEngine: "0xfd7877b7c1fd6ef4250b0bb5e4a83c4b65bc0905",
