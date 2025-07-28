@@ -1,7 +1,8 @@
-// /contracts/index.js
-
 (async () => {
-  const { ethers } = window;
+  if (!window.ethers) {
+    console.error("Ethers not loaded.");
+    return;
+  }
 
   const addresses = {
     ActivityLogger: "0x4e76CB15C8A88a47e5210bf4b1ECE6A9036894ef",
@@ -11,25 +12,33 @@
     RPM: "0x18389e0e5c069a5d1f77bd20899510e31fcfdd8c",
   };
 
+  const loadABI = async (path) => {
+    const res = await fetch(path);
+    if (!res.ok) {
+      throw new Error(`Failed to load ${path}`);
+    }
+    return await res.json();
+  };
+
   const abis = {
-    ActivityLogger: await (await fetch("/contracts/ActivityLogger.json")).json(),
-    HealthID: await (await fetch("/contracts/HealthID.json")).json(),
-    PriceOracle: await (await fetch("/contracts/PriceOracle.json")).json(),
-    RewardEngine: await (await fetch("/contracts/RewardEngine.json")).json(),
-    RPM: await (await fetch("/contracts/RewardPoolManager.json")).json(),
+    ActivityLogger: await loadABI("/contracts/ActivityLogger.json"),
+    HealthID: await loadABI("/contracts/HealthID.json"),
+    PriceOracle: await loadABI("/contracts/PriceOracle.json"),
+    RewardEngine: await loadABI("/contracts/RewardEngine.json"),
+    RPM: await loadABI("/contracts/RewardPoolManager.json"),
   };
 
   window.getContract = async function (name) {
-    if (typeof window.ethereum === "undefined") {
-      throw new Error("MetaMask not found");
+    if (!window.ethereum) {
+      throw new Error("MetaMask not available");
     }
 
     await window.ethereum.request({ method: "eth_requestAccounts" });
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
 
-    if (!addresses[name] || !abis[name]) {
-      throw new Error(`Unknown contract: ${name}`);
+    if (!abis[name] || !addresses[name]) {
+      throw new Error(`Unknown contract name: ${name}`);
     }
 
     return new ethers.Contract(addresses[name], abis[name], signer);
