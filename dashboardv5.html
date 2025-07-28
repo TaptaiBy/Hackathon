@@ -61,13 +61,6 @@
     .card:hover {
       transform: scale(1.02);
     }
-    .card h3 {
-      margin-top: 0;
-    }
-    .stats-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
     .stats-table td {
       padding: 0.5rem 0;
     }
@@ -81,42 +74,12 @@
       height: 10px;
       background: #FF00B4;
     }
-    .character-card {
-      grid-area: character;
-      padding: 2.5rem;
-      font-size: 1.1rem;
-      text-align: center;
-    }
-    .character-avatar {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      margin-bottom: 1rem;
-      object-fit: cover;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    }
+    .character-card { grid-area: character; text-align: center; }
     .metrics-card { grid-area: metrics; }
     .activity-card { grid-area: activity; }
     .rewards-card { grid-area: rewards; }
     .quests-card { grid-area: quests; }
   </style>
-  <script>
-    async function fetchMockData() {
-      try {
-        const response = await fetch('assets/mock/mockhealthdata.json');
-        const data = await response.json();
-        document.querySelector('#steps').textContent = data.steps.toLocaleString();
-        document.querySelector('#sleep').textContent = `${data.sleep} hrs`;
-        document.querySelector('#calories').textContent = `${data.calories} kcal`;
-      } catch (error) {
-        console.error('Failed to fetch mock data:', error);
-      }
-    }
-
-    function triggerSmartContract() {
-      alert('Smart contract function triggered!');
-    }
-  </script>
 </head>
 <body>
   <header>
@@ -131,20 +94,20 @@
 
   <div class="container">
     <h1>Welcome, FitWarrior! ✨</h1>
-
     <div class="dashboard">
+
       <div class="card character-card">
-        <img src="https://cdn-icons-png.flaticon.com/512/5719/5719910.png" alt="Avatar" class="character-avatar">
+        <img src="https://cdn-icons-png.flaticon.com/512/5719/5719910.png" alt="Avatar" style="width: 120px; height: 120px; border-radius: 50%; margin-bottom: 1rem;">
         <h3>👤 Character Status</h3>
         <p><strong>Level:</strong> 7 - "Sweat Slayer"</p>
         <p><strong>XP:</strong> 540 / 1000</p>
         <div class="progress"><div class="progress-bar" style="width: 54%"></div></div>
         <p><strong>Badges:</strong> Early Bird, 10K Champion</p>
-        <hr style="margin: 1.5rem 0;">
+        <hr>
         <h3>🔗 Blockchain Proof</h3>
         <p>HealthID NFT: <span class="status">✅ Issued</span></p>
         <p>Last Verification Hash: <code class="hash">0x47d...a98e</code></p>
-        <div class="links">Transparency: View on <a href="#">Etherscan</a> or <a href="#">Explorer</a></div>
+        <div class="links">View on <a href="#">Etherscan</a> or <a href="#">Explorer</a></div>
       </div>
 
       <div class="card metrics-card">
@@ -163,6 +126,11 @@
           <tr><td>Sleep:</td><td id="sleep">-</td></tr>
           <tr><td>Calories:</td><td id="calories">-</td></tr>
         </table>
+
+        <div id="activity-log" style="margin-top: 1.5rem;">
+          <h4 style="margin-bottom: 0.5rem;">🧾 Verified Activity Log (Today)</h4>
+          <ul id="activity-list" style="list-style: none; padding-left: 0; color: #333;"></ul>
+        </div>
       </div>
 
       <div class="card rewards-card">
@@ -173,7 +141,7 @@
         <p>Next reward at 1500 pts</p>
       </div>
 
-      <div class="card quests-card quests">
+      <div class="card quests-card">
         <h3>🚀 Daily Quests</h3>
         <ul id="daily-quests" style="list-style: none; padding: 0; margin: 0;"></ul>
       </div>
@@ -182,6 +150,7 @@
         <h3>🔥 Streak Tracker</h3>
         <ul id="streaks" style="list-style: none; padding-left: 0; color: #333;"></ul>
       </div>
+
     </div>
   </div>
 
@@ -196,8 +165,6 @@
     const questTypes = ["walking", "run30min", "run45min", "run5k", "run10k", "gym_checkin"];
 
     async function loadDashboardData() {
-      if (!window.ethereum) return;
-
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       await provider.send("eth_requestAccounts", []);
       const signer = provider.getSigner();
@@ -208,35 +175,34 @@
       const today = new Date().toISOString().split("T")[0];
       const streakCounts = {};
       const completedToday = new Set();
+      const listContainer = document.getElementById("activity-list");
+      listContainer.innerHTML = "";
 
       for (let i = 0; i < hashes.length; i++) {
         const activity = await contract.getActivity(hashes[i]);
         const type = activity[2].toLowerCase();
         const timestamp = activity[1] * 1000;
-        const activityDate = new Date(timestamp).toISOString().split("T")[0];
+        const dateStr = new Date(timestamp).toISOString().split("T")[0];
 
-        console.log(`✅ Activity: ${type}`);
-        console.log(`📅 Timestamp: ${activity[1]} → ${new Date(timestamp).toString()}`);
-        console.log(`🆚 Date string: ${activityDate} vs Today: ${today}`);
+        const li = document.createElement("li");
+        li.textContent = `• ${type} @ ${new Date(timestamp).toLocaleString()}`;
+        listContainer.appendChild(li);
 
         streakCounts[type] = (streakCounts[type] || 0) + 1;
-        if (activityDate === today) {
+        if (dateStr === today) {
           completedToday.add(type);
-          console.log(`✔️ Added "${type}" to completedToday`);
-        } else {
-          console.log(`❌ Not from today, skipped`);
         }
       }
 
       const questList = document.getElementById("daily-quests");
       questList.innerHTML = "";
       for (const type of questTypes) {
-        const done = completedToday.has(type.toLowerCase());
+        const done = completedToday.has(type);
         const li = document.createElement("li");
         li.innerHTML = `
           <div style="
-            background: ${done ? '#d1e7dd' : '#f8f9fa'};
-            color: ${done ? '#155724' : '#6c757d'};
+            background: ${done ? '#d1e7dd' : '#f1f1f1'};
+            color: ${done ? '#155724' : '#333'};
             padding: 0.75rem 1rem;
             border-radius: 8px;
             margin-bottom: 0.5rem;
@@ -244,11 +210,9 @@
             justify-content: space-between;
             align-items: center;
             font-weight: 500;
-            opacity: ${done ? '1' : '0.7'};
-            box-shadow: ${done ? '0 0 8px rgba(21, 87, 36, 0.3)' : 'none'};
           ">
             <span>⚡ ${type}</span>
-            <span>${done ? '✅' : ''}</span>
+            ${done ? '✅' : ''}
           </div>
         `;
         questList.appendChild(li);
@@ -263,9 +227,24 @@
       }
     }
 
+    async function fetchMockData() {
+      try {
+        const response = await fetch('assets/mock/mockhealthdata.json');
+        const data = await response.json();
+        document.querySelector('#steps').textContent = data.steps.toLocaleString();
+        document.querySelector('#sleep').textContent = `${data.sleep} hrs`;
+        document.querySelector('#calories').textContent = `${data.calories} kcal`;
+      } catch (error) {
+        console.error('Failed to fetch mock data:', error);
+      }
+    }
+
+    function triggerSmartContract() {
+      alert('Smart contract function triggered!');
+    }
+
     window.addEventListener("DOMContentLoaded", () => {
       fetchMockData();
-      setInterval(fetchMockData, 10000);
       loadDashboardData();
     });
   </script>
