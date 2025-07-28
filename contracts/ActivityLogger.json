@@ -51,6 +51,12 @@
 				"internalType": "uint256",
 				"name": "timestamp",
 				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "value",
+				"type": "uint256"
 			}
 		],
 		"name": "ActivityLogged",
@@ -273,6 +279,11 @@
 				"internalType": "bool",
 				"name": "isRewarded",
 				"type": "bool"
+			},
+			{
+				"internalType": "uint256",
+				"name": "value",
+				"type": "uint256"
 			}
 		],
 		"stateMutability": "view",
@@ -319,19 +330,6 @@
 	{
 		"inputs": [
 			{
-				"internalType": "bytes32[]",
-				"name": "activityHashes",
-				"type": "bytes32[]"
-			}
-		],
-		"name": "batchVerifyActivities",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
 				"internalType": "bytes32",
 				"name": "activityHash",
 				"type": "bytes32"
@@ -346,6 +344,35 @@
 			}
 		],
 		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "activityType",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "value",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			}
+		],
+		"name": "generateHash",
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "",
+				"type": "bytes32"
+			}
+		],
+		"stateMutability": "pure",
 		"type": "function"
 	},
 	{
@@ -389,49 +416,16 @@
 						"internalType": "bool",
 						"name": "isRewarded",
 						"type": "bool"
+					},
+					{
+						"internalType": "uint256",
+						"name": "value",
+						"type": "uint256"
 					}
 				],
 				"internalType": "struct ActivityLogger.Activity",
 				"name": "",
 				"type": "tuple"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "activityType",
-				"type": "string"
-			}
-		],
-		"name": "getActivityTypeCount",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "limit",
-				"type": "uint256"
-			}
-		],
-		"name": "getRecentActivities",
-		"outputs": [
-			{
-				"internalType": "bytes32[]",
-				"name": "",
-				"type": "bytes32[]"
 			}
 		],
 		"stateMutability": "view",
@@ -483,49 +477,6 @@
 				"internalType": "bytes32[]",
 				"name": "",
 				"type": "bytes32[]"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "user",
-				"type": "address"
-			},
-			{
-				"internalType": "string",
-				"name": "activityType",
-				"type": "string"
-			}
-		],
-		"name": "getUserActivitiesByType",
-		"outputs": [
-			{
-				"internalType": "bytes32[]",
-				"name": "",
-				"type": "bytes32[]"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "user",
-				"type": "address"
-			}
-		],
-		"name": "getUserActivityCount",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
 			}
 		],
 		"stateMutability": "view",
@@ -595,16 +546,6 @@
 	{
 		"inputs": [
 			{
-				"internalType": "address",
-				"name": "user",
-				"type": "address"
-			},
-			{
-				"internalType": "bytes32",
-				"name": "activityHash",
-				"type": "bytes32"
-			},
-			{
 				"internalType": "string",
 				"name": "activityType",
 				"type": "string"
@@ -613,9 +554,14 @@
 				"internalType": "uint256",
 				"name": "timestamp",
 				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "value",
+				"type": "uint256"
 			}
 		],
-		"name": "logUnverifiedActivity",
+		"name": "logManualActivity",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -640,6 +586,11 @@
 			{
 				"internalType": "uint256",
 				"name": "timestamp",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "value",
 				"type": "uint256"
 			}
 		],
@@ -737,6 +688,25 @@
 		"type": "function"
 	},
 	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "totalRewardedActivities",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
 		"inputs": [],
 		"name": "unpause",
 		"outputs": [],
@@ -784,19 +754,6 @@
 			}
 		],
 		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "bytes32",
-				"name": "activityHash",
-				"type": "bytes32"
-			}
-		],
-		"name": "verifyActivity",
-		"outputs": [],
-		"stateMutability": "nonpayable",
 		"type": "function"
 	}
 ]
