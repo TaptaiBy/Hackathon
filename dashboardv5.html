@@ -100,6 +100,23 @@
     .rewards-card { grid-area: rewards; }
     .quests-card { grid-area: quests; }
   </style>
+  <script>
+    async function fetchMockData() {
+      try {
+        const response = await fetch('assets/mock/mockhealthdata.json');
+        const data = await response.json();
+        document.querySelector('#steps').textContent = data.steps.toLocaleString();
+        document.querySelector('#sleep').textContent = `${data.sleep} hrs`;
+        document.querySelector('#calories').textContent = `${data.calories} kcal`;
+      } catch (error) {
+        console.error('Failed to fetch mock data:', error);
+      }
+    }
+
+    function triggerSmartContract() {
+      alert('Smart contract function triggered!');
+    }
+  </script>
 </head>
 <body>
   <header>
@@ -168,79 +185,81 @@
     </div>
   </div>
 
-  <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-  <script src="contracts/index.js"></script>
   <script>
-    function triggerSmartContract() {
-      alert('Smart contract function triggered!');
-    }
+    const contractAddress = "0x4e76CB15C8A88a47e5210bf4b1ECE6A9036894ef";
+    const contractABI = [
+      "function getUserVerifiedActivities(address user) external view returns (bytes32[] memory)",
+      "function getActivity(bytes32 activityHash) external view returns (tuple(bytes32,uint256,string,address,bool,bool,uint256))"
+    ];
 
-    const questTypes = ["walk", "run30min", "run45min", "run5k", "run10k", "gym_checkin"];
-
-    async function fetchMockData() {
-      try {
-        const res = await fetch('assets/mock/mockhealthdata.json');
-        const data = await res.json();
-        document.getElementById('steps').textContent = data.steps.toLocaleString();
-        document.getElementById('sleep').textContent = `${data.sleep} hrs`;
-        document.getElementById('calories').textContent = `${data.calories} kcal`;
-      } catch (err) {
-        console.error("Failed to fetch mock data:", err);
-      }
-    }
+    const questTypes = ["walking", "run30min", "run45min", "run5k", "run10k", "gym_checkin"];
 
     async function loadDashboardData() {
-      try {
-        const contract = await getContract("ActivityLogger");
-        const signer = contract.signer;
-        const user = await signer.getAddress();
-        const hashes = await contract.getUserVerifiedActivities(user);
+      if (!window.ethereum) return;
 
-        const today = new Date().toISOString().split("T")[0];
-        const streakCounts = {};
-        const completedToday = new Set();
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      const signer = provider.getSigner();
+      const user = await signer.getAddress();
+      const contract = new ethers.Contract(contractAddress, contractABI, provider);
 
-        for (let hash of hashes) {
-          const activity = await contract.getActivity(hash);
-          const type = activity[2];
-          const dateStr = new Date(activity[1] * 1000).toISOString().split("T")[0];
-          streakCounts[type] = (streakCounts[type] || 0) + 1;
-          if (dateStr === today) completedToday.add(type);
+      const hashes = await contract.getUserVerifiedActivities(user);
+      const today = new Date().toISOString().split("T")[0];
+      const streakCounts = {};
+      const completedToday = new Set();
+
+      for (let i = 0; i < hashes.length; i++) {
+        const activity = await contract.getActivity(hashes[i]);
+        const type = activity[2].toLowerCase();
+        const timestamp = activity[1] * 1000;
+        const activityDate = new Date(timestamp).toISOString().split("T")[0];
+
+        console.log(`✅ Activity: ${type}`);
+        console.log(`📅 Timestamp: ${activity[1]} → ${new Date(timestamp).toString()}`);
+        console.log(`🆚 Date string: ${activityDate} vs Today: ${today}`);
+
+        streakCounts[type] = (streakCounts[type] || 0) + 1;
+        if (activityDate === today) {
+          completedToday.add(type);
+          console.log(`✔️ Added "${type}" to completedToday`);
+        } else {
+          console.log(`❌ Not from today, skipped`);
         }
+      }
 
-        const questList = document.getElementById("daily-quests");
-        questList.innerHTML = "";
-        for (const type of questTypes) {
-          const done = completedToday.has(type);
-          questList.innerHTML += `
-            <li>
-              <div style="
-                background: ${done ? '#d1e7dd' : '#f1f1f1'};
-                color: ${done ? '#155724' : '#333'};
-                padding: 0.75rem 1rem;
-                border-radius: 8px;
-                margin-bottom: 0.5rem;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                font-weight: 500;">
-                <span>⚡ ${type}</span>
-                ${done ? '✅' : ''}
-              </div>
-            </li>`;
-        }
+      const questList = document.getElementById("daily-quests");
+      questList.innerHTML = "";
+      for (const type of questTypes) {
+        const done = completedToday.has(type.toLowerCase());
+        const li = document.createElement("li");
+        li.innerHTML = `
+          <div style="
+            background: ${done ? '#d1e7dd' : '#f8f9fa'};
+            color: ${done ? '#155724' : '#6c757d'};
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 500;
+            opacity: ${done ? '1' : '0.7'};
+            box-shadow: ${done ? '0 0 8px rgba(21, 87, 36, 0.3)' : 'none'};
+          ">
+            <span>⚡ ${type}</span>
+            <span>${done ? '✅' : ''}</span>
+          </div>
+        `;
+        questList.appendChild(li);
+      }
 
-        const streakEl = document.getElementById('streaks');
-        streakEl.innerHTML = "";
-        for (const [type, count] of Object.entries(streakCounts)) {
-          const li = document.createElement("li");
-          li.textContent = `${type}: 🔥 ${count} logs`;
-          streakEl.appendChild(li);
-        }
-
-      } catch (err) {
-        console.error("Dashboard load failed:", err);
+      const streakEl = document.getElementById('streaks');
+      streakEl.innerHTML = "";
+      for (const [type, count] of Object.entries(streakCounts)) {
+        const li = document.createElement("li");
+        li.textContent = `${type}: 🔥 ${count} logs`;
+        streakEl.appendChild(li);
       }
     }
 
