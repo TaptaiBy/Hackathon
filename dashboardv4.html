@@ -187,13 +187,13 @@
 
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <script>
-    const contractAddress = "0x871Ee5907cd8b60e298CAD61fFcf74d55262dfb7";
+    const contractAddress = "0x4e76CB15C8A88a47e5210bf4b1ECE6A9036894ef";
     const contractABI = [
       "function getUserVerifiedActivities(address user) external view returns (bytes32[] memory)",
       "function getActivity(bytes32 activityHash) external view returns (tuple(bytes32,uint256,string,address,bool,bool))"
     ];
 
-    const questTypes = ["walk", "run30min", "run45min", "run5k", "run10k", "gym_checkin"];
+    const questTypes = ["walking", "run30min", "run45min", "run5k", "run10k", "gym_checkin"];
 
     async function loadDashboardData() {
       if (!window.ethereum) return;
