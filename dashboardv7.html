@@ -1,249 +1,112 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Proofpulse Dashboard</title>
-  <link rel="stylesheet" href="dashboard.css" />
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(to right, #0000FF, #5C6EFF);
-      color: #fff;
-    }
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1rem 2rem;
-      background-color: #FF00B4;
-    }
-    .logo img {
-      height: 50px;
-    }
-    .redeem-btn {
-      background-color: #fff;
-      color: #FF00B4;
-      font-weight: bold;
-      padding: 0.5rem 1rem;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-    .container {
-      padding: 2rem;
-      max-width: 1200px;
-      margin: auto;
-    }
-    .calendar-controls {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin: 1rem 0;
-      color: #222;
-    }
-    .calendar-controls button {
-      background-color: #eee;
-      border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    .filter-buttons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-bottom: 1rem;
-    }
-    .filter-buttons button {
-      border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      color: #fff;
-    }
-    .filter-walking { background-color: #28a745; }
-    .filter-running { background-color: #007bff; }
-    .filter-cycling { background-color: #17a2b8; }
-    .filter-gym { background-color: #6f42c1; }
-    .filter-hiit { background-color: #fd7e14; }
-    .filter-all { background-color: #343a40; }
-    #daily-quests div { transition: all 0.2s ease; }
-    #daily-quests div:hover { transform: scale(1.02); }
-    #activity-calendar {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 0.75rem;
-      background: #ffffff;
-      padding: 1.5rem;
-      border-radius: 20px;
-      color: #222;
-      font-size: 0.95rem;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-      margin-top: 1rem;
-    }
-    #activity-calendar div {
-      text-align: center;
-      padding: 1rem;
-      border-radius: 12px;
-      font-weight: 600;
-      background-color: #f3f3f3;
-    }
-    #activity-calendar .weekday {
-      background-color: transparent;
-      color: #333;
-      font-weight: 700;
-      padding: 0.5rem 0;
-    }
-    #activity-calendar .active-day {
-      background-color: #d1e7dd;
-      color: #155724;
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <div class="logo">
-      <a href="index.html"><img src="assets/images/logobw.png" alt="Proofpulse" /></a>
-    </div>
-    <div>
-      <button class="redeem-btn" onclick="alert('Smart contract function triggered!')">🎁 Redeem</button>
-      <a href="index.html" style="color: white; margin-left: 1rem;">Logout</a>
-    </div>
-  </header>
+<script>
+  let currentMonthOffset = 0; // 0 = current month
 
-  <div class="container">
-    <h1>Welcome, FitWarrior! ✨</h1>
+  function renderCalendar(activityDates) {
+    const calendarEl = document.getElementById("activity-calendar");
+    calendarEl.innerHTML = "";
 
-    <div class="calendar-controls">
-      <button onclick="changeMonth(-1)">← Previous</button>
-      <h2 id="month-label"></h2>
-      <button onclick="changeMonth(1)">Next →</button>
-    </div>
+    const today = new Date();
+    const target = new Date(today.getFullYear(), today.getMonth() + currentMonthOffset, 1);
 
-    <div class="filter-buttons">
-      <button class="filter-all" onclick="setFilter('all')">All</button>
-      <button class="filter-walking" onclick="setFilter('walking')">Walking</button>
-      <button class="filter-running" onclick="setFilter('running')">Running</button>
-      <button class="filter-cycling" onclick="setFilter('cycling')">Cycling</button>
-      <button class="filter-gym" onclick="setFilter('gym')">Gym</button>
-      <button class="filter-hiit" onclick="setFilter('hiit')">HIIT</button>
-    </div>
+    const year = target.getFullYear();
+    const month = target.getMonth();
+    const monthLabel = target.toLocaleString("default", { month: "long", year: "numeric" });
+    document.getElementById("calendar-title").textContent = monthLabel;
 
-    <div class="card quests-card">
-      <h3>🚀 Daily Quests</h3>
-      <ul id="daily-quests" style="list-style: none; padding: 0; margin: 0;"></ul>
-    </div>
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-    <div class="card quests-card">
-      <h3>📅 Activity Calendar</h3>
-      <div id="activity-calendar"></div>
-    </div>
-  </div>
+    const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    for (const day of weekdays) {
+      const label = document.createElement("div");
+      label.textContent = day;
+      label.className = "weekday";
+      calendarEl.appendChild(label);
+    }
 
-  <script>
-    const questTypes = [
-      "walking",
-      "running30min",
-      "running45min",
-      "run5k",
-      "run10k",
-      "cycling5k",
-      "cycling10k",
-      "gym_checkin",
-      "hiit25"
-    ];
+    for (let i = 0; i < firstDay; i++) {
+      const empty = document.createElement("div");
+      calendarEl.appendChild(empty);
+    }
 
-    const questLabels = {
-      walking: "🚶 Walking",
-      running30min: "🏃‍♂️ Run 30min",
-      running45min: "🏃‍♂️ Run 45min",
-      run5k: "🏁 Run 5K",
-      run10k: "🏁 Run 10K",
-      cycling5k: "🚴‍♂️ Cycle 5K",
-      cycling10k: "🚴‍♂️ Cycle 10K",
-      gym_checkin: "🏋️‍♂️ Gym Check-in",
-      hiit25: "🔥 HIIT 25min"
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+      const cell = document.createElement("div");
+      cell.textContent = day;
+      if (activityDates.has(dateStr)) {
+        cell.classList.add("active-day");
+      }
+      calendarEl.appendChild(cell);
+    }
+  }
+
+  async function loadDashboardData() {
+    if (!window.ethereum) return;
+
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    await provider.send("eth_requestAccounts", []);
+    const signer = provider.getSigner();
+    const user = await signer.getAddress();
+    const contract = new ethers.Contract(contractAddress, contractABI, provider);
+
+    const hashes = await contract.getUserVerifiedActivities(user);
+    const today = new Date().toISOString().split("T")[0];
+    const completedToday = new Set();
+    const activityDates = new Set();
+
+    for (let i = 0; i < hashes.length; i++) {
+      const activity = await contract.getActivity(hashes[i]);
+      const type = activity[2];
+      const dateStr = new Date(activity[1] * 1000).toISOString().split("T")[0];
+      activityDates.add(dateStr);
+      if (dateStr === today) completedToday.add(type);
+    }
+
+    const questList = document.getElementById("daily-quests");
+    questList.innerHTML = "";
+    for (const type of questTypes) {
+      const done = completedToday.has(type);
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <div style="
+          background: ${done ? '#d1e7dd' : '#f1f1f1'};
+          color: ${done ? '#155724' : '#333'};
+          padding: 0.75rem 1rem;
+          border-radius: 8px;
+          margin-bottom: 0.5rem;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          font-weight: 500;
+        ">
+          <span>${questLabels[type] || type}</span>
+          ${done ? '✅' : ''}
+        </div>
+      `;
+      questList.appendChild(li);
+    }
+
+    renderCalendar(activityDates);
+
+    // Handle month navigation
+    document.getElementById("prev-month").onclick = () => {
+      if (currentMonthOffset > -2) {
+        currentMonthOffset--;
+        renderCalendar(activityDates);
+      }
     };
 
-    const filterMap = {
-      walking: ["walking"],
-      running: ["running30min", "running45min", "run5k", "run10k"],
-      cycling: ["cycling5k", "cycling10k"],
-      gym: ["gym_checkin"],
-      hiit: ["hiit25"]
+    document.getElementById("next-month").onclick = () => {
+      if (currentMonthOffset < 0) {
+        currentMonthOffset++;
+        renderCalendar(activityDates);
+      }
     };
+  }
 
-    let currentFilter = "all";
-    let currentDate = new Date();
-    let monthsOffset = 0;
-
-    function setFilter(filter) {
-      currentFilter = filter;
-      renderQuests();
-    }
-
-    function changeMonth(delta) {
-      const maxOffset = 3;
-      if (monthsOffset + delta < -maxOffset || monthsOffset + delta > 0) return;
-      monthsOffset += delta;
-      currentDate.setMonth(new Date().getMonth() + monthsOffset);
-      renderCalendar();
-    }
-
-    function renderQuests() {
-      const questList = document.getElementById("daily-quests");
-      questList.innerHTML = "";
-      const filtered = currentFilter === "all" ? questTypes : filterMap[currentFilter] || [];
-      for (const type of questTypes) {
-        if (!filtered.includes(type)) continue;
-        const li = document.createElement("li");
-        li.innerHTML = `
-          <div style="background: #f1f1f1; color: #333; padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; font-weight: 500;">
-            <span>${questLabels[type] || type}</span>
-          </div>
-        `;
-        questList.appendChild(li);
-      }
-    }
-
-    function renderCalendar() {
-      const calendarEl = document.getElementById("activity-calendar");
-      const label = document.getElementById("month-label");
-      calendarEl.innerHTML = "";
-      const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-      weekdays.forEach(day => {
-        const cell = document.createElement("div");
-        cell.className = "weekday";
-        cell.textContent = day;
-        calendarEl.appendChild(cell);
-      });
-
-      const year = currentDate.getFullYear();
-      const month = currentDate.getMonth();
-      const firstDay = new Date(year, month, 1).getDay();
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
-      label.textContent = currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
-
-      for (let i = 0; i < firstDay; i++) {
-        calendarEl.appendChild(document.createElement("div"));
-      }
-
-      for (let day = 1; day <= daysInMonth; day++) {
-        const cell = document.createElement("div");
-        cell.textContent = day;
-        if (Math.random() < 0.3) cell.classList.add("active-day");
-        calendarEl.appendChild(cell);
-      }
-    }
-
-    window.addEventListener("DOMContentLoaded", () => {
-      renderQuests();
-      renderCalendar();
-    });
-  </script>
-</body>
-</html>
+  window.addEventListener("DOMContentLoaded", () => {
+    fetchMockData();
+    setInterval(fetchMockData, 10000);
+    loadDashboardData();
+  });
+</script>
