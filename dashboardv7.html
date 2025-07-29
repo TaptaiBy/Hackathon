@@ -81,7 +81,12 @@
       height: 10px;
       background: #FF00B4;
     }
-    .character-card { grid-area: character; padding: 2.5rem; font-size: 1.1rem; text-align: center; }
+    .character-card {
+      grid-area: character;
+      padding: 2.5rem;
+      font-size: 1.1rem;
+      text-align: center;
+    }
     .character-avatar {
       width: 120px;
       height: 120px;
@@ -95,7 +100,6 @@
     .rewards-card { grid-area: rewards; }
     .quests-card { grid-area: quests; }
 
-    /* Activity Calendar Styling */
     #activity-calendar {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
@@ -195,27 +199,20 @@
 
       <div class="card quests-card" style="grid-area: streaks;">
         <h3>📅 Activity Calendar</h3>
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap;">
-          <div>
-            <button id="prev-month" class="redeem-btn" style="padding: 0.25rem 0.75rem;">⬅</button>
-            <span id="calendar-title" style="font-weight: bold; margin: 0 1rem;">Month</span>
-            <button id="next-month" class="redeem-btn" style="padding: 0.25rem 0.75rem;">➡</button>
-          </div>
-          <div style="margin-top: 0.5rem;">
-            <label for="calendar-filter" style="margin-right: 0.5rem;">Filter by activity:</label>
-            <select id="calendar-filter" class="redeem-btn" style="padding: 0.25rem;">
-              <option value="all">All</option>
-              <option value="walking">Walking</option>
-              <option value="running30min">Run 30min</option>
-              <option value="running45min">Run 45min</option>
-              <option value="run5k">Run 5K</option>
-              <option value="run10k">Run 10K</option>
-              <option value="cycling5k">Cycle 5K</option>
-              <option value="cycling10k">Cycle 10K</option>
-              <option value="gym_checkin">Gym Check-in</option>
-              <option value="hiit25">HIIT 25min</option>
-            </select>
-          </div>
+        <div style="margin-bottom: 1rem;">
+          <label for="quest-filter" style="margin-right: 0.5rem;">Filter by Quest:</label>
+          <select id="quest-filter">
+            <option value="all">All</option>
+            <option value="walking">🚶 Walking</option>
+            <option value="running30min">🏃‍♂️ Run 30min</option>
+            <option value="running45min">🏃‍♂️ Run 45min</option>
+            <option value="run5k">🏁 Run 5K</option>
+            <option value="run10k">🏁 Run 10K</option>
+            <option value="cycling5k">🚴‍♂️ Cycle 5K</option>
+            <option value="cycling10k">🚴‍♂️ Cycle 10K</option>
+            <option value="gym_checkin">🏋️‍♂️ Gym Check-in</option>
+            <option value="hiit25">🔥 HIIT 25min</option>
+          </select>
         </div>
         <div id="activity-calendar"></div>
       </div>
@@ -236,59 +233,11 @@
     ];
 
     const questLabels = {
-      walking: "🚶 Walking",
-      running30min: "🏃‍♂️ Run 30min",
-      running45min: "🏃‍♂️ Run 45min",
-      run5k: "🏁 Run 5K",
-      run10k: "🏁 Run 10K",
-      cycling5k: "🚴‍♂️ Cycle 5K",
-      cycling10k: "🚴‍♂️ Cycle 10K",
-      gym_checkin: "🏋️‍♂️ Gym Check-in",
-      hiit25: "🔥 HIIT 25min"
+      walking: "🚶 Walking", running30min: "🏃‍♂️ Run 30min", running45min: "🏃‍♂️ Run 45min",
+      run5k: "🏁 Run 5K", run10k: "🏁 Run 10K",
+      cycling5k: "🚴‍♂️ Cycle 5K", cycling10k: "🚴‍♂️ Cycle 10K",
+      gym_checkin: "🏋️‍♂️ Gym Check-in", hiit25: "🔥 HIIT 25min"
     };
-
-    let currentMonthOffset = 0;
-    let currentActivityFilter = "all";
-    let allActivityMap = new Map();
-
-    function renderCalendar(activityMap) {
-      const calendarEl = document.getElementById("activity-calendar");
-      calendarEl.innerHTML = "";
-
-      const today = new Date();
-      const target = new Date(today.getFullYear(), today.getMonth() + currentMonthOffset, 1);
-      const year = target.getFullYear();
-      const month = target.getMonth();
-      document.getElementById("calendar-title").textContent = target.toLocaleString("default", { month: "long", year: "numeric" });
-
-      const firstDay = new Date(year, month, 1).getDay();
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-      const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-      for (const day of weekdays) {
-        const label = document.createElement("div");
-        label.textContent = day;
-        label.className = "weekday";
-        calendarEl.appendChild(label);
-      }
-
-      for (let i = 0; i < firstDay; i++) {
-        calendarEl.appendChild(document.createElement("div"));
-      }
-
-      for (let day = 1; day <= daysInMonth; day++) {
-        const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-        const activities = activityMap.get(dateStr) || [];
-        const show = currentActivityFilter === "all" || activities.includes(currentActivityFilter);
-
-        const cell = document.createElement("div");
-        cell.textContent = day;
-        if (show && activities.length > 0) {
-          cell.classList.add("active-day");
-        }
-        calendarEl.appendChild(cell);
-      }
-    }
 
     async function fetchMockData() {
       try {
@@ -314,17 +263,14 @@
       const hashes = await contract.getUserVerifiedActivities(user);
       const today = new Date().toISOString().split("T")[0];
       const completedToday = new Set();
-      allActivityMap = new Map();
+      const activityMap = new Map();
 
       for (let i = 0; i < hashes.length; i++) {
         const activity = await contract.getActivity(hashes[i]);
         const type = activity[2];
         const dateStr = new Date(activity[1] * 1000).toISOString().split("T")[0];
-
-        if (!allActivityMap.has(dateStr)) {
-          allActivityMap.set(dateStr, []);
-        }
-        allActivityMap.get(dateStr).push(type);
+        if (!activityMap.has(dateStr)) activityMap.set(dateStr, new Set());
+        activityMap.get(dateStr).add(type);
         if (dateStr === today) completedToday.add(type);
       }
 
@@ -352,26 +298,47 @@
         questList.appendChild(li);
       }
 
-      renderCalendar(allActivityMap);
-
-      document.getElementById("prev-month").onclick = () => {
-        if (currentMonthOffset > -2) {
-          currentMonthOffset--;
-          renderCalendar(allActivityMap);
-        }
-      };
-
-      document.getElementById("next-month").onclick = () => {
-        if (currentMonthOffset < 0) {
-          currentMonthOffset++;
-          renderCalendar(allActivityMap);
-        }
-      };
-
-      document.getElementById("calendar-filter").addEventListener("change", (e) => {
-        currentActivityFilter = e.target.value;
-        renderCalendar(allActivityMap);
+      renderCalendar(activityMap);
+      document.getElementById("quest-filter").addEventListener("change", (e) => {
+        renderCalendar(activityMap, e.target.value);
       });
+    }
+
+    function renderCalendar(activityMap, filter = "all") {
+      const calendarEl = document.getElementById("activity-calendar");
+      calendarEl.innerHTML = "";
+
+      const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      for (const day of weekdays) {
+        const label = document.createElement("div");
+        label.textContent = day;
+        label.className = "weekday";
+        calendarEl.appendChild(label);
+      }
+
+      const todayDate = new Date();
+      const year = todayDate.getFullYear();
+      const month = todayDate.getMonth();
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      for (let i = 0; i < firstDay; i++) {
+        const empty = document.createElement("div");
+        calendarEl.appendChild(empty);
+      }
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+        const cell = document.createElement("div");
+        cell.textContent = day;
+
+        const quests = activityMap.get(dateStr);
+        if (quests && (filter === "all" || quests.has(filter))) {
+          cell.classList.add("active-day");
+        }
+
+        calendarEl.appendChild(cell);
+      }
     }
 
     window.addEventListener("DOMContentLoaded", () => {
