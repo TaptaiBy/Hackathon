@@ -99,40 +99,44 @@
     .activity-card { grid-area: activity; }
     .rewards-card { grid-area: rewards; }
     .quests-card { grid-area: quests; }
+
+    /* Activity Calendar Styling */
     #activity-calendar {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
-      gap: 0.5rem;
-      background: #fff;
-      padding: 1rem;
-      border-radius: 12px;
+      gap: 0.75rem;
+      background: #ffffff;
+      padding: 1.5rem;
+      border-radius: 20px;
       color: #222;
-      font-size: 0.9rem;
+      font-size: 0.95rem;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      margin-top: 1rem;
     }
     #activity-calendar div {
       text-align: center;
-      padding: 0.75rem;
-      border-radius: 8px;
-      font-weight: bold;
+      padding: 1rem;
+      border-radius: 12px;
+      font-weight: 600;
+      background-color: #f3f3f3;
+      transition: all 0.2s ease;
+    }
+    #activity-calendar div:hover {
+      transform: scale(1.05);
+      background-color: #eaeaea;
+    }
+    #activity-calendar .weekday {
+      background-color: transparent;
+      color: #333;
+      font-weight: 700;
+      padding: 0.5rem 0;
+      cursor: default;
+    }
+    #activity-calendar .active-day {
+      background-color: #d1e7dd;
+      color: #155724;
     }
   </style>
-  <script>
-    async function fetchMockData() {
-      try {
-        const response = await fetch('assets/mock/mockhealthdata.json');
-        const data = await response.json();
-        document.querySelector('#steps').textContent = data.steps.toLocaleString();
-        document.querySelector('#sleep').textContent = `${data.sleep} hrs`;
-        document.querySelector('#calories').textContent = `${data.calories} kcal`;
-      } catch (error) {
-        console.error('Failed to fetch mock data:', error);
-      }
-    }
-
-    function triggerSmartContract() {
-      alert('Smart contract function triggered!');
-    }
-  </script>
 </head>
 <body>
   <header>
@@ -140,7 +144,7 @@
       <a href="index.html"><img src="assets/images/logobw.png" alt="Proofpulse" /></a>
     </div>
     <div>
-      <button class="redeem-btn" onclick="triggerSmartContract()">🎁 Redeem</button>
+      <button class="redeem-btn" onclick="alert('Smart contract function triggered!')">🎁 Redeem</button>
       <a href="index.html" style="color: white; margin-left: 1rem;">Logout</a>
     </div>
   </header>
@@ -209,7 +213,41 @@
       "function getActivity(bytes32 activityHash) external view returns (tuple(bytes32,uint256,string,address,bool,bool))"
     ];
 
-    const questTypes = ["walking", "running30min", "run45min", "run5k", "run10k", "gym_checkin"];
+    const questTypes = [
+      "walking",
+      "running30min",
+      "running45min",
+      "run5k",
+      "run10k",
+      "cycling5k",
+      "cycling10k",
+      "gym_checkin",
+      "hiit25"
+    ];
+
+    const questLabels = {
+      walking: "🚶 Walking",
+      running30min: "🏃‍♂️ Run 30min",
+      running45min: "🏃‍♂️ Run 45min",
+      run5k: "🏁 Run 5K",
+      run10k: "🏁 Run 10K",
+      cycling5k: "🚴‍♂️ Cycle 5K",
+      cycling10k: "🚴‍♂️ Cycle 10K",
+      gym_checkin: "🏋️‍♂️ Gym Check-in",
+      hiit25: "🔥 HIIT 25min"
+    };
+
+    async function fetchMockData() {
+      try {
+        const response = await fetch('assets/mock/mockhealthdata.json');
+        const data = await response.json();
+        document.querySelector('#steps').textContent = data.steps.toLocaleString();
+        document.querySelector('#sleep').textContent = `${data.sleep} hrs`;
+        document.querySelector('#calories').textContent = `${data.calories} kcal`;
+      } catch (error) {
+        console.error('Failed to fetch mock data:', error);
+      }
+    }
 
     async function loadDashboardData() {
       if (!window.ethereum) return;
@@ -250,14 +288,14 @@
             align-items: center;
             font-weight: 500;
           ">
-            <span>⚡ ${type}</span>
+            <span>${questLabels[type] || type}</span>
             ${done ? '✅' : ''}
           </div>
         `;
         questList.appendChild(li);
       }
 
-      // Render activity calendar
+      // Render Activity Calendar
       const calendarEl = document.getElementById("activity-calendar");
       calendarEl.innerHTML = "";
 
@@ -265,8 +303,7 @@
       for (const day of weekdays) {
         const label = document.createElement("div");
         label.textContent = day;
-        label.style.fontWeight = "600";
-        label.style.textAlign = "center";
+        label.className = "weekday";
         calendarEl.appendChild(label);
       }
 
@@ -285,8 +322,9 @@
         const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
         const cell = document.createElement("div");
         cell.textContent = day;
-        cell.style.background = activityDates.has(dateStr) ? "#d1e7dd" : "#f1f1f1";
-        cell.style.color = activityDates.has(dateStr) ? "#155724" : "#333";
+        if (activityDates.has(dateStr)) {
+          cell.classList.add("active-day");
+        }
         calendarEl.appendChild(cell);
       }
     }
