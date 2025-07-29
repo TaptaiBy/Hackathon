@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Proofpulse</title>
   <link rel="stylesheet" href="dashboard.css" />
   <style>
@@ -99,6 +99,22 @@
     .activity-card { grid-area: activity; }
     .rewards-card { grid-area: rewards; }
     .quests-card { grid-area: quests; }
+    #activity-calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.5rem;
+      background: #fff;
+      padding: 1rem;
+      border-radius: 12px;
+      color: #222;
+      font-size: 0.9rem;
+    }
+    #activity-calendar div {
+      text-align: center;
+      padding: 0.75rem;
+      border-radius: 8px;
+      font-weight: bold;
+    }
   </style>
   <script>
     async function fetchMockData() {
@@ -179,8 +195,8 @@
       </div>
 
       <div class="card quests-card" style="grid-area: streaks;">
-        <h3>🔥 Streak Tracker</h3>
-        <ul id="streaks" style="list-style: none; padding-left: 0; color: #333;"></ul>
+        <h3>📅 Activity Calendar</h3>
+        <div id="activity-calendar"></div>
       </div>
     </div>
   </div>
@@ -206,14 +222,14 @@
 
       const hashes = await contract.getUserVerifiedActivities(user);
       const today = new Date().toISOString().split("T")[0];
-      const streakCounts = {};
       const completedToday = new Set();
+      const activityDates = new Set();
 
       for (let i = 0; i < hashes.length; i++) {
         const activity = await contract.getActivity(hashes[i]);
         const type = activity[2];
         const dateStr = new Date(activity[1] * 1000).toISOString().split("T")[0];
-        streakCounts[type] = (streakCounts[type] || 0) + 1;
+        activityDates.add(dateStr);
         if (dateStr === today) completedToday.add(type);
       }
 
@@ -241,12 +257,37 @@
         questList.appendChild(li);
       }
 
-      const streakEl = document.getElementById('streaks');
-      streakEl.innerHTML = "";
-      for (const [type, count] of Object.entries(streakCounts)) {
-        const li = document.createElement("li");
-        li.textContent = `${type}: 🔥 ${count} logs`;
-        streakEl.appendChild(li);
+      // Render activity calendar
+      const calendarEl = document.getElementById("activity-calendar");
+      calendarEl.innerHTML = "";
+
+      const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      for (const day of weekdays) {
+        const label = document.createElement("div");
+        label.textContent = day;
+        label.style.fontWeight = "600";
+        label.style.textAlign = "center";
+        calendarEl.appendChild(label);
+      }
+
+      const todayDate = new Date();
+      const year = todayDate.getFullYear();
+      const month = todayDate.getMonth();
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      for (let i = 0; i < firstDay; i++) {
+        const empty = document.createElement("div");
+        calendarEl.appendChild(empty);
+      }
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+        const cell = document.createElement("div");
+        cell.textContent = day;
+        cell.style.background = activityDates.has(dateStr) ? "#d1e7dd" : "#f1f1f1";
+        cell.style.color = activityDates.has(dateStr) ? "#155724" : "#333";
+        calendarEl.appendChild(cell);
       }
     }
 
