@@ -51,8 +51,7 @@ document.getElementById("signupForm").addEventListener("submit", async function 
           dob,
           policyNumber,
           parseInt(policyValue),
-          insurerAddress,
-          "https://example.com/metadata.json"
+          insurerAddress
         ).send({ from: account });
   
         alert("HealthID created successfully!");
