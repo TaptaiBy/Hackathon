@@ -45,6 +45,15 @@ document.getElementById("signupForm").addEventListener("submit", async function 
         const web3 = new Web3(window.ethereum);
         const contract = new web3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
   
+        console.log("Calling mintHealthID with:", [
+          account,
+          fullName,
+          dob,
+          policyNumber,
+          parseInt(policyValue),
+          insurerAddress
+        ]);
+
         await contract.methods.mintHealthID(
           account,
           fullName,
