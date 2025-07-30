@@ -84,7 +84,18 @@ document.getElementById("signupForm").addEventListener("submit", async function 
           insurerAddress
         ).send({ from: account });
   
-        alert("HealthID created successfully!");
+        Swal.fire({
+          icon: 'success',
+          title: 'Registered!',
+          text: 'Redirecting to login...',
+          showConfirmButton: false,
+          timer: 2000,
+          position: 'center',
+          timerProgressBar: true,
+          didClose: () => {
+            window.location.href = 'login.html';
+          }
+        });
       } else {
         alert("Please install MetaMask");
       }
