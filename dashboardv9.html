@@ -42,7 +42,10 @@
       width: 100%;
       height: 100%;
       background-color: rgba(0, 0, 0, 0.5); /* 0.5 = 50% black */
-      z-index: 0;
+      z-index: 1;
+    }
+    .main-content {
+      z-index: 2;
     }
     .container {
       padding: 2rem;
@@ -158,73 +161,75 @@
   </header>
 
   <div class="bg-overlay"></div>
-  <div class="container">
-    <h1>Welcome, FitWarrior! ✨</h1>
-
-    <div class="dashboard">
-      <div class="card character-card">
-        <img src="https://cdn-icons-png.flaticon.com/512/5719/5719910.png" alt="Avatar" class="character-avatar">
-        <h3>👤 Character Status</h3>
-        <p><strong>Level:</strong> -</p>
-        <p><strong>XP:</strong> -</p>
-        <div class="progress"><div class="progress-bar" style="width: 0%"></div></div>
-        <p><strong>Badges:</strong> Early Bird, 10K Champion</p>
-        <hr style="margin: 1.5rem 0;">
-        <h3>🔗 Blockchain Proof</h3>
-        <p>HealthID NFT: <span class="status">✅ Issued</span></p>
-        <p>Last Verification Hash: <code class="hash">0x47d...a98e</code></p>
-        <div class="links">Transparency: View on <a href="#">Etherscan</a> or <a href="#">Explorer</a></div>
-      </div>
-
-      <div class="card metrics-card">
-        <h3>🏋️ Body Metrics</h3>
-        <table class="stats-table">
-          <tr><td>Height:</td><td>169 cm</td></tr>
-          <tr><td>Weight:</td><td>77.3 kg</td></tr>
-          <tr><td>Body Fat:</td><td>20.8%</td></tr>
-        </table>
-      </div>
-
-      <div class="card activity-card">
-        <h3>🚶️ Daily Activity</h3>
-        <table class="stats-table">
-          <tr><td>Steps:</td><td id="steps">-</td></tr>
-          <tr><td>Sleep:</td><td id="sleep">-</td></tr>
-          <tr><td>Calories:</td><td id="calories">-</td></tr>
-        </table>
-      </div>
-
-      <div class="card rewards-card">
-        <h3>🌟 Points & Rewards</h3>
-        <p><strong>Total Points:</strong> 1,250</p>
-        <p><strong>Today:</strong> +120</p>
-        <div class="progress"><div class="progress-bar" style="width: 75%"></div></div>
-        <p>Next reward at 1500 pts</p>
-      </div>
-
-      <div class="card quests-card quests">
-        <h3>🚀 Daily Quests</h3>
-        <ul id="daily-quests" style="list-style: none; padding: 0; margin: 0;"></ul>
-      </div>
-
-      <div class="card quests-card" style="grid-area: streaks;">
-        <h3>📅 Activity Calendar</h3>
-        <div style="margin-bottom: 1rem;">
-          <label for="quest-filter" style="margin-right: 0.5rem;">Filter by Quest:</label>
-          <select id="quest-filter">
-            <option value="all">All</option>
-            <option value="walking">🚶 Walking</option>
-            <option value="running30min">🏃‍♂️ Run 30min</option>
-            <option value="running45min">🏃‍♂️ Run 45min</option>
-            <option value="run5k">🏁 Run 5K</option>
-            <option value="run10k">🏁 Run 10K</option>
-            <option value="cycling5k">🚴‍♂️ Cycle 5K</option>
-            <option value="cycling10k">🚴‍♂️ Cycle 10K</option>
-            <option value="gym_checkin">🏋️‍♂️ Gym Check-in</option>
-            <option value="hiit25">🔥 HIIT 25min</option>
-          </select>
+  <div class="main-content">
+    <div class="container">
+      <h1>Welcome, FitWarrior! ✨</h1>
+  
+      <div class="dashboard">
+        <div class="card character-card">
+          <img src="https://cdn-icons-png.flaticon.com/512/5719/5719910.png" alt="Avatar" class="character-avatar">
+          <h3>👤 Character Status</h3>
+          <p><strong>Level:</strong> -</p>
+          <p><strong>XP:</strong> -</p>
+          <div class="progress"><div class="progress-bar" style="width: 0%"></div></div>
+          <p><strong>Badges:</strong> Early Bird, 10K Champion</p>
+          <hr style="margin: 1.5rem 0;">
+          <h3>🔗 Blockchain Proof</h3>
+          <p>HealthID NFT: <span class="status">✅ Issued</span></p>
+          <p>Last Verification Hash: <code class="hash">0x47d...a98e</code></p>
+          <div class="links">Transparency: View on <a href="#">Etherscan</a> or <a href="#">Explorer</a></div>
         </div>
-        <div id="activity-calendar"></div>
+  
+        <div class="card metrics-card">
+          <h3>🏋️ Body Metrics</h3>
+          <table class="stats-table">
+            <tr><td>Height:</td><td>169 cm</td></tr>
+            <tr><td>Weight:</td><td>77.3 kg</td></tr>
+            <tr><td>Body Fat:</td><td>20.8%</td></tr>
+          </table>
+        </div>
+  
+        <div class="card activity-card">
+          <h3>🚶️ Daily Activity</h3>
+          <table class="stats-table">
+            <tr><td>Steps:</td><td id="steps">-</td></tr>
+            <tr><td>Sleep:</td><td id="sleep">-</td></tr>
+            <tr><td>Calories:</td><td id="calories">-</td></tr>
+          </table>
+        </div>
+  
+        <div class="card rewards-card">
+          <h3>🌟 Points & Rewards</h3>
+          <p><strong>Total Points:</strong> 1,250</p>
+          <p><strong>Today:</strong> +120</p>
+          <div class="progress"><div class="progress-bar" style="width: 75%"></div></div>
+          <p>Next reward at 1500 pts</p>
+        </div>
+  
+        <div class="card quests-card quests">
+          <h3>🚀 Daily Quests</h3>
+          <ul id="daily-quests" style="list-style: none; padding: 0; margin: 0;"></ul>
+        </div>
+  
+        <div class="card quests-card" style="grid-area: streaks;">
+          <h3>📅 Activity Calendar</h3>
+          <div style="margin-bottom: 1rem;">
+            <label for="quest-filter" style="margin-right: 0.5rem;">Filter by Quest:</label>
+            <select id="quest-filter">
+              <option value="all">All</option>
+              <option value="walking">🚶 Walking</option>
+              <option value="running30min">🏃‍♂️ Run 30min</option>
+              <option value="running45min">🏃‍♂️ Run 45min</option>
+              <option value="run5k">🏁 Run 5K</option>
+              <option value="run10k">🏁 Run 10K</option>
+              <option value="cycling5k">🚴‍♂️ Cycle 5K</option>
+              <option value="cycling10k">🚴‍♂️ Cycle 10K</option>
+              <option value="gym_checkin">🏋️‍♂️ Gym Check-in</option>
+              <option value="hiit25">🔥 HIIT 25min</option>
+            </select>
+          </div>
+          <div id="activity-calendar"></div>
+        </div>
       </div>
     </div>
   </div>
