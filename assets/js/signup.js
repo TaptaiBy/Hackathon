@@ -67,8 +67,6 @@ document.getElementById("signupForm").addEventListener("submit", async function 
           return;
         }
         console.log("Calling mintHealthID with:", [
-          caller: account,
-          user: account,
           account,
           fullName,
           dob,
