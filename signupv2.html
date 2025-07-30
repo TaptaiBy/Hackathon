@@ -2,32 +2,92 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Mint HealthID</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign Up | ProofPulse</title>
+  <link rel="stylesheet" href="styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: url('assets/images/signupbg.jpg') no-repeat center center fixed;
+      background-size: cover;
+      backdrop-filter: blur(6px);
+      color: #fff;
+    }
+
+    .signup-container {
+      background: rgba(0, 0, 0, 0.6);
+      padding: 2rem 3rem;
+      border-radius: 16px;
+      max-width: 500px;
+      margin: 5vh auto;
+      color: #fff;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    input, select, button {
+      width: 100%;
+      margin-bottom: 1rem;
+      padding: 0.5rem;
+      border-radius: 8px;
+      border: none;
+      font-size: 1rem;
+    }
+
+    label {
+      margin-top: 1rem;
+      display: block;
+      font-weight: bold;
+    }
+
+    button.primary {
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button.primary:hover {
+      background-color: #45a049;
+    }
+
+    #status {
+      margin-top: 1rem;
+      font-size: 0.95rem;
+    }
+  </style>
 </head>
+
 <body>
-  <h2>Mint Your HealthID</h2>
+  <div class="signup-container">
+    <h2>Sign Up for ProofPulse</h2>
+    <form id="signupForm">
+      <label for="name">Full Name:</label>
+      <input type="text" id="name" name="name" required />
 
-  <form id="signupForm">
-    <label>Full Name:</label><br />
-    <input type="text" id="name" required /><br /><br />
+      <label for="dob">Date of Birth:</label>
+      <input type="date" id="dob" name="dob" required />
 
-    <label>Date of Birth:</label><br />
-    <input type="date" id="dob" required /><br /><br />
+      <label for="insurer">Insurer:</label>
+      <select id="insurer" name="insurer" required>
+        <option value="">-- Select Insurer --</option>
+        <option value="aia">AIA</option>
+        <option value="prudential">Prudential</option>
+        <option value="metlife">MetLife</option>
+      </select>
 
-    <label>Policy Number:</label><br />
-    <input type="text" id="policyNo" required /><br /><br />
+      <label for="policy-number">Policy Number:</label>
+      <input type="text" id="policy-number" name="policy-number" required />
 
-    <label>Insurance Contract Value (USD):</label><br />
-    <input type="number" id="contractValue" required /><br /><br />
+      <label for="policy-value">Policy Value (USD):</label>
+      <input type="number" id="policy-value" name="policy-value" required />
 
-    <label>Insurance Company Address:</label><br />
-    <input type="text" id="insuranceCompany" required /><br /><br />
-
-    <button type="submit">Mint HealthID</button>
-  </form>
-
-  <p id="status"></p>
+      <button type="submit" class="primary">Sign Up</button>
+    </form>
+    <div id="status"></div>
+  </div>
 
   <script>
     const CONTRACT_ADDRESS = "0x85b214a4C577a3D8A0023E5808e4d672eBe96268";
@@ -48,45 +108,51 @@
       }
     ];
 
+    const insurerAddresses = {
+      "aia": "0x96483E0277EFeE50Cf6151B10ad825ca6d03bd01",
+      "prudential": "0x1111111111111111111111111111111111111111",
+      "metlife": "0x2222222222222222222222222222222222222222"
+    };
+
     const form = document.getElementById("signupForm");
     const status = document.getElementById("status");
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      status.innerText = "Connecting to wallet...";
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      status.innerText = "⏳ Connecting to wallet...";
 
       try {
-        if (!window.ethereum) throw new Error("MetaMask not found");
-
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         await provider.send("eth_requestAccounts", []);
         const signer = provider.getSigner();
         const userAddress = await signer.getAddress();
+
         const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
 
         const name = document.getElementById("name").value;
         const dob = document.getElementById("dob").value;
-        const policyNo = document.getElementById("policyNo").value;
-        const contractValue = document.getElementById("contractValue").value;
-        const insuranceCompany = document.getElementById("insuranceCompany").value;
+        const policyNo = document.getElementById("policy-number").value;
+        const policyValue = document.getElementById("policy-value").value;
+        const insurerKey = document.getElementById("insurer").value;
 
-        status.innerText = "Sending transaction...";
+        const insurerAddress = insurerAddresses[insurerKey];
+        if (!insurerAddress) throw new Error("Invalid insurer selected");
+
+        status.innerText = "⛓ Sending transaction...";
         const tx = await contract.mintHealthID(
           userAddress,
           name,
           dob,
           policyNo,
-          ethers.BigNumber.from(contractValue),
-          insuranceCompany
+          ethers.BigNumber.from(policyValue),
+          insurerAddress
         );
 
-        status.innerText = "Waiting for confirmation...";
         await tx.wait();
-
-        status.innerText = `✅ HealthID minted successfully! Tx Hash: ${tx.hash}`;
-      } catch (err) {
-        console.error(err);
-        status.innerText = `❌ Error: ${err.message || "Something went wrong"}`;
+        status.innerText = `✅ Success! HealthID minted.\nTx Hash: ${tx.hash}`;
+      } catch (error) {
+        console.error(error);
+        status.innerText = `❌ Error: ${error.message || "Transaction failed"}`;
       }
     });
   </script>
