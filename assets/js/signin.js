@@ -2,7 +2,7 @@ document.getElementById("connectBtn").addEventListener("click", async () => {
   const status = document.getElementById("status");
 
   try {
-    const CONTRACT_ADDRESS = "0x60c928ea4f6f73e129f0a9c2d940bc3dbb721250";
+    const CONTRACT_ADDRESS = "0x85b214a4C577a3D8A0023E5808e4d672eBe96268";
 
     // ✅ Load ABI manually
     const response = await fetch("contracts/HealthID.json");
