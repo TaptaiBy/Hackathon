@@ -75,9 +75,10 @@
         const tokenId = await contract.getUserTokenId(userAddress);
 
         if (tokenId.gt(0)) {
-          statusText.innerHTML = "✅ Access granted. Health ID verified!";
-          // Optional: redirect user to dashboard
-          // window.location.href = "dashboard.html";
+          statusText.textContent = "✅ Health ID verified! Redirecting...";
+          setTimeout(() => {
+            window.location.href = "dashboardv8.html";
+          }, 1000); // optional delay for better UX
         } else {
           statusText.textContent = "❌ No Health ID NFT found for this wallet.";
         }
