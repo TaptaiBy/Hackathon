@@ -17,6 +17,32 @@
   backdrop-filter: blur(6px);
   color: #fff;
 }
+    
+.navbar {
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 1rem 2rem;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+}
+
+.navbar-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  height: 40px;
+  cursor: pointer;
+  transition: opacity 0.3s ease;
+}
+
+.logo:hover {
+  opacity: 0.8;
+}
 
 .signup-container {
   background: rgba(0, 0, 0, 0.6);
@@ -30,6 +56,12 @@
 
   </style>
 <body>
+<header class="navbar">
+  <div class="navbar-content">
+    <a href="index.html" class="logo-link">
+      <img src="assets/images/logobw.png" alt="ProofPulse Logo" class="logo" /></a>
+  </div>
+</header>
 
   <div class="signup-container">
     <h2>Sign Up for ProofPulse</h2>
