@@ -67,7 +67,7 @@ document.getElementById("signupForm").addEventListener("submit", async function 
           return;
         }
         console.log("Calling mintHealthID with:", [
-          caller: account,           // who is signing the tx (the minter)
+          caller: account,
           user: account,
           account,
           fullName,
