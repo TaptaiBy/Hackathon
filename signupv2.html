@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Mint HealthID</title>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+</head>
+<body>
+  <h2>Mint Your HealthID</h2>
+
+  <form id="signupForm">
+    <label>Full Name:</label><br />
+    <input type="text" id="name" required /><br /><br />
+
+    <label>Date of Birth:</label><br />
+    <input type="date" id="dob" required /><br /><br />
+
+    <label>Policy Number:</label><br />
+    <input type="text" id="policyNo" required /><br /><br />
+
+    <label>Insurance Contract Value (USD):</label><br />
+    <input type="number" id="contractValue" required /><br /><br />
+
+    <label>Insurance Company Address:</label><br />
+    <input type="text" id="insuranceCompany" required /><br /><br />
+
+    <button type="submit">Mint HealthID</button>
+  </form>
+
+  <p id="status"></p>
+
+  <script>
+    const CONTRACT_ADDRESS = "0x85b214a4C577a3D8A0023E5808e4d672eBe96268";
+    const ABI = [
+      {
+        "inputs": [
+          { "internalType": "address", "name": "user", "type": "address" },
+          { "internalType": "string", "name": "name", "type": "string" },
+          { "internalType": "string", "name": "dob", "type": "string" },
+          { "internalType": "string", "name": "policyNo", "type": "string" },
+          { "internalType": "uint256", "name": "contractValue", "type": "uint256" },
+          { "internalType": "address", "name": "insuranceCompany", "type": "address" }
+        ],
+        "name": "mintHealthID",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      }
+    ];
+
+    const form = document.getElementById("signupForm");
+    const status = document.getElementById("status");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      status.innerText = "Connecting to wallet...";
+
+      try {
+        if (!window.ethereum) throw new Error("MetaMask not found");
+
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+        const signer = provider.getSigner();
+        const userAddress = await signer.getAddress();
+        const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
+
+        const name = document.getElementById("name").value;
+        const dob = document.getElementById("dob").value;
+        const policyNo = document.getElementById("policyNo").value;
+        const contractValue = document.getElementById("contractValue").value;
+        const insuranceCompany = document.getElementById("insuranceCompany").value;
+
+        status.innerText = "Sending transaction...";
+        const tx = await contract.mintHealthID(
+          userAddress,
+          name,
+          dob,
+          policyNo,
+          ethers.BigNumber.from(contractValue),
+          insuranceCompany
+        );
+
+        status.innerText = "Waiting for confirmation...";
+        await tx.wait();
+
+        status.innerText = `✅ HealthID minted successfully! Tx Hash: ${tx.hash}`;
+      } catch (err) {
+        console.error(err);
+        status.innerText = `❌ Error: ${err.message || "Something went wrong"}`;
+      }
+    });
+  </script>
+</body>
+</html>
