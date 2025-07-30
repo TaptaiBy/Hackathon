@@ -41,10 +41,31 @@ document.getElementById("signupForm").addEventListener("submit", async function 
       if (window.ethereum) {
         const accounts = await ethereum.request({ method: "eth_requestAccounts" });
         const account = accounts[0];
+        console.log("MetaMask connected, account:", account);
   
         const web3 = new Web3(window.ethereum);
         const contract = new web3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
   
+        // --- Debug checks before minting ---
+        const paused = await contract.methods.paused().call();
+        console.log("Paused state:", paused);
+        if (paused) {
+          alert("Contract is currently paused. Cannot mint.");
+          return;
+        }
+        const minterRole = await contract.methods.MINTER_ROLE().call();
+        const isMinter = await contract.methods.hasRole(minterRole, account).call();
+        console.log("Has MINTER_ROLE:", isMinter);
+        if (!isMinter) {
+          alert("Your wallet does not have MINTER_ROLE. Cannot mint.");
+          return;
+        }
+        const tokenId = await contract.methods.tokenOf(account).call();
+        console.log("Existing HealthID token:", tokenId);
+        if (parseInt(tokenId) !== 0) {
+          alert("This account already has a HealthID NFT.");
+          return;
+        }
         console.log("Calling mintHealthID with:", [
           caller: account,           // who is signing the tx (the minter)
           user: account,
@@ -55,13 +76,6 @@ document.getElementById("signupForm").addEventListener("submit", async function 
           parseInt(policyValue),
           insurerAddress
         ]);
-      
-        const tokenId = await contract.methods.tokenOf(account).call();
-        console.log("Existing HealthID token for this account:", tokenId);
-        if (parseInt(tokenId) !== 0) {
-          alert("This account already has a HealthID NFT. Minting skipped.");
-          return;
-        }
         
         await contract.methods.mintHealthID(
           account,
