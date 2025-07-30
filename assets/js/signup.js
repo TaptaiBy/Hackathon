@@ -46,6 +46,8 @@ document.getElementById("signupForm").addEventListener("submit", async function 
         const contract = new web3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
   
         console.log("Calling mintHealthID with:", [
+          caller: account,           // who is signing the tx (the minter)
+          user: account,
           account,
           fullName,
           dob,
@@ -53,7 +55,14 @@ document.getElementById("signupForm").addEventListener("submit", async function 
           parseInt(policyValue),
           insurerAddress
         ]);
-
+      
+        const tokenId = await contract.methods.tokenOf(account).call();
+        console.log("Existing HealthID token for this account:", tokenId);
+        if (parseInt(tokenId) !== 0) {
+          alert("This account already has a HealthID NFT. Minting skipped.");
+          return;
+        }
+        
         await contract.methods.mintHealthID(
           account,
           fullName,
