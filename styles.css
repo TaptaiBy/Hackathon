@@ -190,6 +190,10 @@ nav a {
   box-shadow: 0 10px 25px rgba(0,0,0,0.2);
 }
 
+.wider-cards .card {
+  max-width: 300px;
+}
+
 .content-wrapper {
   position: relative;
   z-index: 1;
