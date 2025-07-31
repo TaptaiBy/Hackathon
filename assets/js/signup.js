@@ -93,7 +93,7 @@ document.getElementById("signupForm").addEventListener("submit", async function 
           position: 'center',
           timerProgressBar: true,
           didClose: () => {
-            window.location.href = 'login.html';
+            window.location.href = 'loginusingNFT.html';
           }
         });
       } else {
