@@ -191,7 +191,7 @@ nav a {
 }
 
 .wider-cards .card {
-  max-width: 360px;
+  max-width: 360px !important;
   width: 100%
 }
 
