@@ -320,7 +320,7 @@
     const signer = provider.getSigner();
     const user = await signer.getAddress();
 
-    const explorerBase = "https://etherscan.io";
+    const explorerBase = "https://sepolia.etherscan.io";
     const healthIdContractAddress = "0x85b214a4C577a3D8A0023E5808e4d672eBe96268";
     const healthIdABI = [
       "event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)"
@@ -455,6 +455,7 @@
       fetchMockData();
       setInterval(fetchMockData, 10000);
       loadDashboardData();
+      loadMintTx();
     });
   </script>
 </body>
