@@ -29,7 +29,7 @@ document.getElementById("signupForm").addEventListener("submit", async function 
       return;
     }
     console.log(`Selected Insurer: ${insurerKey}, Wallet: ${insurerAddress}`);
-    const CONTRACT_ADDRESS = "0x85b214a4C577a3D8A0023E5808e4d672eBe96268";
+    const CONTRACT_ADDRESS = "0xB17c14EA002510d1541396F62E81b086f134c942";
 
     // 1. Simulate insurer validation (mock)
     const response = await fetch("assets/mock/insurer.json");
