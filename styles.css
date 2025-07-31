@@ -185,6 +185,16 @@ nav a {
   text-align: center;
 }
 
+.card_ {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 1.5rem;
+  border-radius: 12px;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+  width: 350px;
+  text-align: center;
+}
+
 .card:hover {
   transform: translateY(-5px) scale(1.02);
   box-shadow: 0 10px 25px rgba(0,0,0,0.2);
