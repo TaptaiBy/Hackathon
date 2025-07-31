@@ -5,11 +5,11 @@
   }
 
   const addresses = {
-    ActivityLogger: "0x4e76CB15C8A88a47e5210bf4b1ECE6A9036894ef",
-    HealthID: "0x60c928ea4f6f73e129f0a9c2d940bc3dbb721250",
-    PriceOracle: "0xfda8f534cc264f711b56975065338e3605b08dc8",
-    RewardEngine: "0xfd7877b7c1fd6ef4250b0bb5e4a83c4b65bc0905",
-    RPM: "0x18389e0e5c069a5d1f77bd20899510e31fcfdd8c",
+    ActivityLogger: "0x29894b9D2a47AE7e580e0b893efF98a0BbE3a56B",
+    HealthID: "0xB17c14EA002510d1541396F62E81b086f134c942",
+    PriceOracle: "0x119Ae6648d91363033CC1ba8f4e989FB1Ba4eE01",
+    RewardEngine: "0x6EC048aF1248be522241B21dfC38130531E4f3A1",
+    RPM: "0x881d0741DE260f499C71e7F889698F4D25e2e090",
   };
 
   const loadABI = async (path) => {
