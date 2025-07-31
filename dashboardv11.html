@@ -314,47 +314,62 @@
     }
     
     // NFT part
-    async function loadMintTx() {
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    await provider.send("eth_requestAccounts", []);
-    const signer = provider.getSigner();
-    const user = await signer.getAddress();
+   async function loadMintTx() {
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
+  await provider.send("eth_requestAccounts", []);
+  const signer = provider.getSigner();
+  const user = await signer.getAddress();
 
-    const explorerBase = "https://sepolia.etherscan.io";
-    const healthIdContractAddress = "0x85b214a4C577a3D8A0023E5808e4d672eBe96268";
-    const healthIdABI = [
-      "event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)"
-    ];
+  const explorerBase = "https://sepolia.etherscan.io";
+  const healthIdContractAddress = "0x85b214a4C577a3D8A0023E5808e4d672eBe96268";
+  const healthIdABI = [
+    "function balanceOf(address) view returns (uint256)",
+    "function tokenOfOwnerByIndex(address owner, uint256 index) view returns (uint256)",
+    "event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)"
+  ];
 
-    const healthIdContract = new ethers.Contract(healthIdContractAddress, healthIdABI, provider);
-    const mintFilter = healthIdContract.filters.Transfer(ethers.constants.AddressZero, user);
+  const healthIdContract = new ethers.Contract(healthIdContractAddress, healthIdABI, provider);
 
-    try {
-      const events = await healthIdContract.queryFilter(mintFilter, 0, "latest");
-
-      if (events.length > 0) {
-        const mintTx = events[0].transactionHash;
-        const shortHash = `${mintTx.slice(0, 6)}...${mintTx.slice(-4)}`;
-        const txUrl = `${explorerBase}/tx/${mintTx}`;
-        const tokenId = events[0].args.tokenId;
-
-        document.getElementById("nft-status").textContent = "✅ Issued";
-        document.getElementById("nft-mint-tx").innerHTML = `
-          <a href="${txUrl}" target="_blank">${shortHash}</a>
-        `;
-        document.getElementById("nft-token-id").textContent = `#${tokenId.toString()}`;
-      } else {
-        document.getElementById("nft-status").textContent = "❌ Not found";
-        document.getElementById("nft-mint-tx").textContent = "No mint transaction found";
-        document.getElementById("nft-token-id").textContent = "-";
-      }
-    } catch (err) {
-      console.error("Error loading mint transaction:", err);
-      document.getElementById("nft-status").textContent = "⚠️ Error";
-      document.getElementById("nft-mint-tx").textContent = "Could not fetch transaction";
+  try {
+    const balance = await healthIdContract.balanceOf(user);
+    if (balance.eq(0)) {
+      document.getElementById("nft-status").textContent = "❌ Not found";
+      document.getElementById("nft-mint-tx").textContent = "No NFT owned";
       document.getElementById("nft-token-id").textContent = "-";
+      return;
     }
+
+    const tokenId = await healthIdContract.tokenOfOwnerByIndex(user, 0);
+
+    // Now fetch the mint transaction for that tokenId
+    const mintFilter = healthIdContract.filters.Transfer(ethers.constants.AddressZero, user);
+    const events = await healthIdContract.queryFilter(mintFilter, 0, "latest");
+
+    // Find the one that matches our tokenId
+    const mintEvent = events.find(e => e.args.tokenId.toString() === tokenId.toString());
+
+    if (!mintEvent) {
+      document.getElementById("nft-status").textContent = "⚠️ Mint tx not found";
+      document.getElementById("nft-mint-tx").textContent = "-";
+      document.getElementById("nft-token-id").textContent = `#${tokenId}`;
+      return;
+    }
+
+    const mintTx = mintEvent.transactionHash;
+    const shortHash = `${mintTx.slice(0, 6)}...${mintTx.slice(-4)}`;
+    const txUrl = `${explorerBase}/tx/${mintTx}`;
+
+    document.getElementById("nft-status").textContent = "✅ Issued";
+    document.getElementById("nft-mint-tx").innerHTML = `<a href="${txUrl}" target="_blank">${shortHash}</a>`;
+    document.getElementById("nft-token-id").textContent = `#${tokenId}`;
+  } catch (err) {
+    console.error("Error in loadMintTx:", err);
+    document.getElementById("nft-status").textContent = "⚠️ Error";
+    document.getElementById("nft-mint-tx").textContent = "Could not load mint tx";
+    document.getElementById("nft-token-id").textContent = "-";
   }
+}
+
     // NFT part
     async function loadDashboardData() {
       if (!window.ethereum) return;
