@@ -180,9 +180,11 @@
           <p><strong>Badges:</strong> Early Bird, 10K Champion</p>
           <hr style="margin: 1.5rem 0;">
           <h3>🔗 Blockchain Proof</h3>
-          <p>HealthID NFT: <span class="status">✅ Issued</span></p>
-          <p>HealthID NFT Address: <code id="nft-contract-address">Loading...</code></p>
-          <div class="links">Transparency: View on <a href="#">Etherscan</a> or <a href="#">Explorer</a></div>
+          <p>HealthID NFT: <span class="status" id="nft-status">Checking...</span></p>
+          <p>Minted via Tx: <code id="nft-mint-tx">Loading...</code></p>  
+          <p>Token ID: <code id="nft-token-id">Loading...</code></p>
+
+
         </div>
   
         <div class="card metrics-card">
@@ -310,15 +312,31 @@
         console.error('Failed to fetch mock data:', error);
       }
     }
-    const healthIdContractAddress = "0x85b214a4C577a3D8A0023E5808e4d672eBe96268"; // Replace with real address
-const explorerBase = "https://sepolia.etherscan.io"; // or "https://sepolia.etherscan.io", etc.
-const shortContract = `${healthIdContractAddress.slice(0, 6)}...${healthIdContractAddress.slice(-4)}`;
-
-document.getElementById("nft-contract-address").innerHTML = `
-  <a href="${explorerBase}/address/${healthIdContractAddress}" target="_blank">${shortContract}</a>
-`;
-
     
+    // NFT part
+    const healthIdContractAddress = "0x85b214a4C577a3D8A0023E5808e4d672eBe96268"; // Replace with real address
+
+    const healthIdContract = new ethers.Contract(healthIdContractAddress, healthIdABI, provider);
+    const mintFilter = healthIdContract.filters.Transfer(ethers.constants.AddressZero, user);
+    const events = await healthIdContract.queryFilter(mintFilter, 0, "latest");
+
+    if (events.length > 0) {
+    const mintTx = events[0].transactionHash;
+    const shortHash = `${mintTx.slice(0, 6)}...${mintTx.slice(-4)}`;
+    const txUrl = `${explorerBase}/tx/${mintTx}`;
+
+    document.getElementById("nft-status").textContent = "✅ Issued";
+    document.getElementById("nft-mint-tx").innerHTML = `
+    <a href="${txUrl}" target="_blank">${shortHash}</a>
+    `;
+    } else {
+    document.getElementById("nft-status").textContent = "❌ Not found";
+    document.getElementById("nft-mint-tx").textContent = "No mint transaction found";
+    }
+    const tokenId = events[0].args.tokenId;
+    document.getElementById("nft-token-id").textContent = `#${tokenId.toString()}`;
+
+    // NFT part
     async function loadDashboardData() {
       if (!window.ethereum) return;
 
