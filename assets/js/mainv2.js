@@ -66,23 +66,22 @@ async function logActivityFromJSON(data) {
     await provider.send("eth_requestAccounts", []);
     const signer = provider.getSigner();
 
-    const contractAddress = "0xd9145CCE52D386f254917e481eB44e9943F39138"; // replace with your deployed address
+    const contractAddress = "0xd9145CCE52D386f254917e481eB44e9943F39138"; // Replace with your deployed contract address
     const contractABI = [
       "function logVerifiedActivity(address user, bytes32 activityHash, string activityType, uint256 timestamp, uint256 value) external"
     ];
     const contract = new ethers.Contract(contractAddress, contractABI, signer);
 
-    // ✅ Guard clause: only log if it's verified
-    if (jsonData.result !== "REAL") {
-      alert("Activity is not verified (result !== 'REAL').");
+    if (data.result !== "REAL") {
+      alert("⚠️ Activity not verified.");
       return;
     }
 
-    // ✅ Extract and format values
-    const activityType = data.features.quest_type; // "running45min"
-    const value = data.features.total_distance_km * 1000; // Convert km to meters
+    const features = data.features;
+    const activityType = features.activity_type;              // e.g. "run"
+    const value = features.total_distance_km * 1000;          // convert km to meters
     const timestamp = Math.floor(Date.now() / 1000);
-    const user = await signer.getAddress();
+    const user = await signer.getAddress();                   // ⬅️ Use connected wallet
 
     const activityHash = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
@@ -99,25 +98,18 @@ async function logActivityFromJSON(data) {
       value
     );
 
-    console.log("Transaction sent to blockchain:", tx.hash);
+    console.log("⏳ TX Sent:", tx.hash);
     await tx.wait();
-
-    alert("✅ Activity successfully logged!\nTx Hash: " + tx.hash);
+    alert("✅ Activity logged!\nTx Hash: " + tx.hash);
 
   } catch (err) {
-    console.error("❌ Full contract transaction error:", err);
+    console.error("❌ Error logging activity:", err);
 
-    let errorText = "❌ Failed to send activity to smart contract!\n\n";
-    if (err.message) errorText += "Message: " + err.message + "\n\n";
-    if (err.code) errorText += "Code: " + err.code + "\n\n";
-    if (err.stack) errorText += "Stack:\n" + err.stack + "\n\n";
-    if (err.reason) errorText += "Reason: " + err.reason + "\n\n";
-    if (err.data) errorText += "Data: " + JSON.stringify(err.data) + "\n\n";
-    errorText += "Full error JSON:\n" + JSON.stringify(err, null, 2);
-
-    alert(errorText);
+    let msg = "❌ Failed to send activity to smart contract.\n\n";
+    if (err.message) msg += "Message: " + err.message + "\n";
+    if (err.reason) msg += "Reason: " + err.reason + "\n";
+    if (err.data) msg += "Data: " + JSON.stringify(err.data) + "\n";
+    alert(msg);
   }
 }
-
-
 }
