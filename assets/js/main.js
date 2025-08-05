@@ -61,39 +61,58 @@ async function sendRecordToContract(features) {
       alert("Please install Metamask to continue!");
       return;
     }
+
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     await provider.send("eth_requestAccounts", []);
     const signer = provider.getSigner();
 
-    const contractAddress = "0xd9145CCE52D386f254917e481eB44e9943F39138"; // <-- Điền đúng địa chỉ contract
+    const contractAddress = "0xd9145CCE52D386f254917e481eB44e9943F39138";
     const contractABI = [
-      "function logActivity(string activityType, string details) public"
+      "function logVerifiedActivity(address user, bytes32 activityHash, string activityType, uint256 timestamp, uint256 value) external"
     ];
     const contract = new ethers.Contract(contractAddress, contractABI, signer);
 
-    const activityType = "workout";
-    const details = JSON.stringify(features);
+    // 🧠 Example values (you can adjust depending on `features` structure)
+    const activityType = features.type || "run5k"; // e.g. from features.type
+    const value = features.value || 5000;           // e.g. distance/duration
+    const timestamp = Math.floor(Date.now() / 1000);
+    const userAddress = await signer.getAddress();
 
-    const tx = await contract.logActivity(activityType, details);
+    // ✅ Must hash exactly the same as Solidity's `generateHash`
+    const activityHash = ethers.utils.keccak256(
+      ethers.utils.defaultAbiCoder.encode(
+        ["string", "uint256", "address"],
+        [activityType, value, userAddress]
+      )
+    );
+
+    const tx = await contract.logVerifiedActivity(
+      userAddress,
+      activityHash,
+      activityType,
+      timestamp,
+      value
+    );
+
     console.log("Transaction sent to blockchain:", tx.hash);
-
     await tx.wait();
-    alert("Workout record successfully stored on blockchain!\nTx hash: " + tx.hash);
+
+    alert("Activity successfully stored on blockchain!\nTx hash: " + tx.hash);
 
   } catch (err) {
-    // Log toàn bộ object lỗi ra console (để inspect trong devtools)
     console.error("Full contract transaction error:", err);
 
-    // Hiển thị ra popup đầy đủ thông tin nhất có thể
-    let errorText = "Failed to send workout record to smart contract!\n\n";
-
-    if (err && err.message) errorText += "Message: " + err.message + "\n\n";
-    if (err && err.code) errorText += "Code: " + err.code + "\n\n";
-    if (err && err.stack) errorText += "Stack:\n" + err.stack + "\n\n";
-    if (err && err.reason) errorText += "Reason: " + err.reason + "\n\n";
-    if (err && err.data) errorText += "Data: " + JSON.stringify(err.data) + "\n\n";
-    if (typeof err === "object") errorText += "Full error JSON:\n" + JSON.stringify(err, null, 2);
+    let errorText = "❌ Failed to send activity to smart contract!\n\n";
+    if (err.message) errorText += "Message: " + err.message + "\n\n";
+    if (err.code) errorText += "Code: " + err.code + "\n\n";
+    if (err.stack) errorText += "Stack:\n" + err.stack + "\n\n";
+    if (err.reason) errorText += "Reason: " + err.reason + "\n\n";
+    if (err.data) errorText += "Data: " + JSON.stringify(err.data) + "\n\n";
+    errorText += "Full error JSON:\n" + JSON.stringify(err, null, 2);
 
     alert(errorText);
+  }
 }
+
 }
+
