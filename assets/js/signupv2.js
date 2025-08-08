@@ -87,4 +87,4 @@ document.getElementById("signupForm").addEventListener("submit", async function 
     alert("Registration failed. See console for details.");
   }
 
-}); // 👈 You were missing this closing bracket!
+}); 
