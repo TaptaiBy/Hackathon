@@ -28,7 +28,7 @@ document.getElementById("signupForm").addEventListener("submit", async function 
     return;
   }
 
-  const HEALTHID_ADDRESS = "0xea5a13f401312eE5F3Ad06485E00ea0b7aC00CB8";
+  // ✅ Minimal ABI for only registerUser
   const HEALTHID_ABI = [
     {
       "inputs": [
@@ -42,15 +42,10 @@ document.getElementById("signupForm").addEventListener("submit", async function 
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "paused",
-      "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
-      "stateMutability": "view",
-      "type": "function"
     }
   ];
+
+  const HEALTHID_ADDRESS = "0xea5a13f401312eE5F3Ad06485E00ea0b7aC00CB8";
 
   try {
     if (!window.ethereum) {
@@ -64,14 +59,7 @@ document.getElementById("signupForm").addEventListener("submit", async function 
 
     const healthID = new web3.eth.Contract(HEALTHID_ABI, HEALTHID_ADDRESS);
 
-    // ✅ Check if contract is paused
-    const paused = await healthID.methods.paused().call();
-    if (paused) {
-      alert("HealthID contract is currently paused.");
-      return;
-    }
-
-    // ✅ Call registerUser
+    // ✅ Call registerUser directly
     await healthID.methods.registerUser(
       fullName,
       dob,
@@ -80,6 +68,7 @@ document.getElementById("signupForm").addEventListener("submit", async function 
       insurerAddress
     ).send({ from: account });
 
+    // ✅ Show success popup and redirect
     Swal.fire({
       icon: "success",
       title: "Registered!",
@@ -89,7 +78,7 @@ document.getElementById("signupForm").addEventListener("submit", async function 
       position: "center",
       timerProgressBar: true,
       didClose: () => {
-        window.location.href = "signinv2.html";
+        window.location.href = "signin.html";
       }
     });
 
