@@ -195,7 +195,7 @@
         </div>
           
           <h3>🩺 Health ID Proof</h3>
-          <p>Hashtx: <span id="tx">Loading...</span></p> 
+          
           <p>Date of Birth: <span id="health-dob">Loading...</span></p>
           <p>Policy No: <span id="health-policy">Loading...</span></p>
           <p>Contract Value: <span id="health-contract">Loading...</span></p>
@@ -262,8 +262,8 @@
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 <script>
   // ===== Addresses & minimal ABIs =====
-  const activityLoggerAddress = "0xa1Bfa3017471fb82dbC5e7e6E2Fe4501825337eE";
-  const healthIdAddress      = "0xec080955027c09bF04547036776B0392F8C4A3B2";
+  const activityLoggerAddress = "0x26E24bfe2A21515eb91Cea4b754FA56067bC70cB";
+  const healthIdAddress      = "0x7bC0fC7A7EF15FA2839c32F6a3b04B2edD3e3e68";
 
   const activityLoggerAbi = [
     "function getUserActivities(address user) view returns ((uint256 distanceKmX100,uint256 elevationGainM,bool isRewarded)[])"
@@ -356,44 +356,35 @@
     }
   }
 
+  
   // ===== HealthID Part =====
-  async function loadHealthID(userAddress, provider) {
-    try {
-      const health = new ethers.Contract(healthIdAddress, healthIdAbi, provider);
+async function loadHealthID(userAddress, provider) {
+  try {
+    const health = new ethers.Contract(healthIdAddress, healthIdAbi, provider);
 
-      // users(address)
-      const u = await health.users(userAddress);
+    // users(address)
+    const u = await health.users(userAddress);
 
-      // Update welcome header with HealthID name
-      if (u.name && u.name.length) {
-        const h1 = document.querySelector("h1");
-        if (h1) h1.textContent = `Welcome, ${u.name}! ✨`;
-      }
-
-      // Fill proof section
-      document.getElementById("health-dob").textContent      = formatDobValue(u.dob);
-      document.getElementById("health-policy").textContent   = u.policyNo;
-      document.getElementById("health-contract").textContent = `${ethers.utils.formatEther(u.contractValue)} ETH`;
-
-      // Insurer name/address
-      const info = await health.getUserInsurerInfo(userAddress);
-      document.getElementById("health-insurer").textContent  = `${info.insurerName} (${info.insurerAddress})`;
-
-      // Last registration tx
-      const filter = health.filters.UserRegistered(userAddress, null, null, null);
-      const logs = await health.queryFilter(filter, 0, "latest");
-      if (logs.length) {
-        const txHash = logs[logs.length - 1].transactionHash;
-        document.getElementById("tx").innerHTML =
-          `<a href="https://holesky.etherscan.io/tx/${txHash}" target="_blank" rel="noopener noreferrer">${txHash}</a>`;
-      } else {
-        document.getElementById("tx").textContent = "Not found";
-      }
-
-    } catch (error) {
-      console.error("Error loading Health ID:", error);
+    // Update welcome header with HealthID name
+    if (u.name && u.name.length) {
+      const h1 = document.querySelector("h1");
+      if (h1) h1.textContent = `Welcome, ${u.name}! ✨`;
     }
+
+    // Fill proof section (removed Hashtx line)
+    document.getElementById("health-dob").textContent      = formatDobValue(u.dob);
+    document.getElementById("health-policy").textContent   = u.policyNo;
+    document.getElementById("health-contract").textContent = `${ethers.utils.formatEther(u.contractValue)} ETH`;
+
+    // Insurer name/address
+    const info = await health.getUserInsurerInfo(userAddress);
+    document.getElementById("health-insurer").textContent  = `${info.insurerName} (${info.insurerAddress})`;
+
+  } catch (error) {
+    console.error("Error loading Health ID:", error);
   }
+}
+
 
   // ===== Boot =====
   window.addEventListener("load", initCharacterStatus);
