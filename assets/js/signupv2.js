@@ -38,15 +38,16 @@ document.getElementById("signupForm").addEventListener("submit", async function 
 
     const REWARD_POOL_ABI = [
       {
-        "constant": true,
-        "inputs": [{ "name": "insurer", "type": "address" }],
-        "name": "insurers",
+        "inputs": [{ "internalType": "address", "name": "insurer", "type": "address" }],
+        "name": "getInsurerProfile",
         "outputs": [
-          { "name": "name", "type": "string" },
-          { "name": "licenseInfo", "type": "string" },
-          { "name": "isActive", "type": "bool" },
-          { "name": "registeredAt", "type": "uint256" }
+          { "internalType": "string", "name": "name", "type": "string" },
+          { "internalType": "string", "name": "licenseInfo", "type": "string" },
+          { "internalType": "bool", "name": "isActive", "type": "bool" },
+          { "internalType": "uint256", "name": "registeredAt", "type": "uint256" },
+          { "internalType": "uint256", "name": "balance", "type": "uint256" }
         ],
+        "stateMutability": "view",
         "type": "function"
       }
     ];
@@ -63,15 +64,22 @@ document.getElementById("signupForm").addEventListener("submit", async function 
 
     const web3 = new Web3(window.ethereum);
 
-    // Validate insurer on-chain
+    // Validate insurer on-chain using getInsurerProfile()
     const rewardPool = new web3.eth.Contract(REWARD_POOL_ABI, REWARD_POOL_ADDRESS);
-    const insurerData = await rewardPool.methods.insurers(insurerAddress).call();
-    console.log("On-chain insurer data:", insurerData);
+    const insurerData = await rewardPool.methods.getInsurerProfile(insurerAddress).call();
+
+    console.log("On-chain insurer profile:", insurerData);
 
     if (!insurerData.isActive) {
       alert("This insurer is not active. Cannot proceed.");
       return;
     }
+
+    // Optional: Show insurer info in UI
+    console.log(`Insurer name: ${insurerData.name}`);
+    console.log(`License: ${insurerData.licenseInfo}`);
+    console.log(`Registered at: ${new Date(insurerData.registeredAt * 1000).toLocaleString()}`);
+    console.log(`Insurer balance: ${insurerData.balance} wei`);
 
     // Connect to HealthID contract
     const contract = new web3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
@@ -89,7 +97,7 @@ document.getElementById("signupForm").addEventListener("submit", async function 
       fullName,
       dob,
       policyNumber,
-      policyValue, // Already in wei
+      policyValue,
       insurerAddress
     ).send({ from: account });
 
