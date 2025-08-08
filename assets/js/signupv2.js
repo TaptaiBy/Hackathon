@@ -45,7 +45,7 @@ document.getElementById("signupForm").addEventListener("submit", async function 
     }
   ];
 
-  const HEALTHID_ADDRESS = "0xea5a13f401312eE5F3Ad06485E00ea0b7aC00CB8";
+  const HEALTHID_ADDRESS = "0xec080955027c09bF04547036776B0392F8C4A3B2";
 
   try {
     if (!window.ethereum) {
@@ -78,7 +78,7 @@ document.getElementById("signupForm").addEventListener("submit", async function 
       position: "center",
       timerProgressBar: true,
       didClose: () => {
-        window.location.href = "signin.html";
+        window.location.href = "signinv2.html";
       }
     });
 
