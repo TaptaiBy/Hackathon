@@ -260,61 +260,73 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
- <script>
+<script>
+  // ===== Addresses & minimal ABIs =====
   const activityLoggerAddress = "0xa1Bfa3017471fb82dbC5e7e6E2Fe4501825337eE";
-  const healthIdAddress = "0xec080955027c09bF04547036776B0392F8C4A3B2";
+  const healthIdAddress      = "0xec080955027c09bF04547036776B0392F8C4A3B2";
+
   const activityLoggerAbi = [
     "function getUserActivities(address user) view returns ((uint256 distanceKmX100,uint256 elevationGainM,bool isRewarded)[])"
   ];
+
+  // Only what we use: users(), getUserInsurerInfo(), UserRegistered
   const healthIdAbi = [
-  {
-    "inputs": [
-      { "internalType": "address", "name": "", "type": "address" }
-    ],
-    "name": "users",
-    "outputs": [
-      { "internalType": "address", "name": "user", "type": "address" },
-      { "internalType": "string", "name": "name", "type": "string" },
-      { "internalType": "uint256", "name": "dob", "type": "uint256" },
-      { "internalType": "string", "name": "policyNo", "type": "string" },
-      { "internalType": "uint256", "name": "contractValue", "type": "uint256" },
-      { "internalType": "address", "name": "insurer", "type": "address" }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "user", "type": "address" }
-    ],
-    "name": "getUserInsurerInfo",
-    "outputs": [
-      { "internalType": "string", "name": "insurerName", "type": "string" },
-      { "internalType": "address", "name": "insurerAddress", "type": "address" },
-      { "internalType": "string", "name": "licenseInfo", "type": "string" }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      { "indexed": true, "internalType": "address", "name": "user", "type": "address" },
-      { "indexed": false, "internalType": "string", "name": "name", "type": "string" },
-      { "indexed": false, "internalType": "address", "name": "insurer", "type": "address" },
-      { "indexed": false, "internalType": "uint256", "name": "contractValue", "type": "uint256" }
-    ],
-    "name": "UserRegistered",
-    "type": "event"
-  }
-];
+    {
+      "inputs":[{"internalType":"address","name":"","type":"address"}],
+      "name":"users",
+      "outputs":[
+        {"internalType":"address","name":"user","type":"address"},
+        {"internalType":"string","name":"name","type":"string"},
+        {"internalType":"uint256","name":"dob","type":"uint256"},
+        {"internalType":"string","name":"policyNo","type":"string"},
+        {"internalType":"uint256","name":"contractValue","type":"uint256"},
+        {"internalType":"address","name":"insurer","type":"address"}
+      ],
+      "stateMutability":"view","type":"function"
+    },
+    {
+      "inputs":[{"internalType":"address","name":"user","type":"address"}],
+      "name":"getUserInsurerInfo",
+      "outputs":[
+        {"internalType":"string","name":"insurerName","type":"string"},
+        {"internalType":"address","name":"insurerAddress","type":"address"},
+        {"internalType":"string","name":"licenseInfo","type":"string"}
+      ],
+      "stateMutability":"view","type":"function"
+    },
+    {
+      "anonymous":false,
+      "inputs":[
+        {"indexed":true,"internalType":"address","name":"user","type":"address"},
+        {"indexed":false,"internalType":"string","name":"name","type":"string"},
+        {"indexed":false,"internalType":"address","name":"insurer","type":"address"},
+        {"indexed":false,"internalType":"uint256","name":"contractValue","type":"uint256"}
+      ],
+      "name":"UserRegistered","type":"event"
+    }
+  ];
 
-
- ///////// Character status Part//////
+  // ===== Character status constants =====
   const XP_PER_ACTIVITY = 10;
   const XP_PER_LEVEL = 100;
-   
-    async function initCharacterStatus() {
+
+  // ===== Helpers =====
+  function formatDobValue(dobBig) {
+    // dob can be BigNumber seconds or milliseconds since epoch (or 0)
+    const val = typeof dobBig === "object" && dobBig._isBigNumber
+      ? parseInt(dobBig.toString(), 10)
+      : Number(dobBig);
+
+    if (!val || Number.isNaN(val)) return "Not set";
+
+    // Heuristic: > 10,000,000,000 => already milliseconds
+    const date = val > 10000000000 ? new Date(val) : new Date(val * 1000);
+    return date.toLocaleDateString("en-GB");
+  }
+
+  // ===== Main loaders =====
+  // ===== Character Status Part =====
+  async function initCharacterStatus() {
     try {
       if (!window.ethereum) throw new Error("Wallet not found");
       const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -322,8 +334,9 @@
       const signer = provider.getSigner();
       const user = await signer.getAddress();
 
-      const contract = new ethers.Contract(activityLoggerAddress, activityLoggerAbi, provider);
-      const activities = await contract.getUserActivities(user);
+      // Character status
+      const activity = new ethers.Contract(activityLoggerAddress, activityLoggerAbi, provider);
+      const activities = await activity.getUserActivities(user);
 
       const count = activities.length;
       const xp = count * XP_PER_ACTIVITY;
@@ -335,66 +348,57 @@
       document.getElementById("xp-value").textContent = xp;
       document.querySelector(".progress-bar").style.width = pct + "%";
 
-    await loadHealthID(user);
-      
+      // Health ID
+      await loadHealthID(user, provider);
+
     } catch (err) {
       console.error(err);
     }
   }
 
-  ////////Health ID Part///////
+  // ===== HealthID Part =====
+  async function loadHealthID(userAddress, provider) {
+    try {
+      const health = new ethers.Contract(healthIdAddress, healthIdAbi, provider);
 
- async function loadHealthID(userAddress) {
-  try {
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const healthIDContract = new ethers.Contract(healthIdAddress, healthIdAbi, provider);
+      // users(address)
+      const u = await health.users(userAddress);
 
-    // Fetch Health ID details
-    const result = await healthIDContract.users(userAddress);
+      // Update welcome header with HealthID name
+      if (u.name && u.name.length) {
+        const h1 = document.querySelector("h1");
+        if (h1) h1.textContent = `Welcome, ${u.name}! ✨`;
+      }
 
-    // Format DOB
-    let formattedDob;
-    const dobStr = result.dob.toString();
-    if (dobStr.length === 8) {
-      // DDMMYYYY
-      formattedDob = `${dobStr.slice(0, 2)}/${dobStr.slice(2, 4)}/${dobStr.slice(4)}`;
-    } else {
-      // Timestamp
-      formattedDob = new Date(Number(result.dob) * 1000).toLocaleDateString("en-GB");
+      // Fill proof section
+      document.getElementById("health-dob").textContent      = formatDobValue(u.dob);
+      document.getElementById("health-policy").textContent   = u.policyNo;
+      document.getElementById("health-contract").textContent = `${ethers.utils.formatEther(u.contractValue)} ETH`;
+
+      // Insurer name/address
+      const info = await health.getUserInsurerInfo(userAddress);
+      document.getElementById("health-insurer").textContent  = `${info.insurerName} (${info.insurerAddress})`;
+
+      // Last registration tx
+      const filter = health.filters.UserRegistered(userAddress, null, null, null);
+      const logs = await health.queryFilter(filter, 0, "latest");
+      if (logs.length) {
+        const txHash = logs[logs.length - 1].transactionHash;
+        document.getElementById("tx").innerHTML =
+          `<a href="https://holesky.etherscan.io/tx/${txHash}" target="_blank" rel="noopener noreferrer">${txHash}</a>`;
+      } else {
+        document.getElementById("tx").textContent = "Not found";
+      }
+
+    } catch (error) {
+      console.error("Error loading Health ID:", error);
     }
-
-    document.getElementById('health-dob').textContent = formattedDob;
-    document.getElementById('health-policy').textContent = result.policyNo;
-    document.getElementById('health-contract').textContent =
-      `${ethers.utils.formatEther(result.contractValue)} ETH`;
-    
-    const insurerInfo = await healthIDContract.getUserInsurerInfo(userAddress);
-    document.getElementById('health-insurer').textContent = `${insurerInfo.insurerName} (${insurerInfo.insurerAddress})`;
-
-
-    // Get last UserRegistered event
-    const filter = healthIDContract.filters.UserRegistered(userAddress, null, null, null);
-    const events = await healthIDContract.queryFilter(filter, 0, "latest");
-
-    if (events.length > 0) {
-      const txHash = events[events.length - 1].transactionHash;
-      document.getElementById('tx').innerHTML =
-        `<a href="https://holesky.etherscan.io/tx/${txHash}" target="_blank">${txHash}</a>`;
-    } else {
-      document.getElementById('tx').textContent = 'Not found';
-    }
-
-  } catch (error) {
-    console.error("Error loading Health ID:", error);
   }
-}
 
-////////////
-   
+  // ===== Boot =====
   window.addEventListener("load", initCharacterStatus);
-  
-   
 </script>
+
 
 
 <script src="/static/main.js"></script>
