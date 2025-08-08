@@ -390,7 +390,7 @@ async function loadHealthID(userAddress, provider) {
   // ===== Daily Acitivity Part =====
    async function fetchMockData() {
       try {
-        const response = await fetch('static/assets/mock/mockhealthdata.json');
+        const response = await fetch('assets/mock/mockhealthdata.json');
         const data = await response.json();
         document.querySelector('#steps').textContent = data.steps.toLocaleString();
         document.querySelector('#sleep').textContent = `${data.sleep} hrs`;
