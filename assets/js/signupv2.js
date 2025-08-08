@@ -82,12 +82,5 @@ document.getElementById("signupForm").addEventListener("submit", async function 
       }
     });
 
-  } catch (err) {
-    console.error("Error during registration:", err);
-    if (err?.data?.message) {
-      alert("Revert reason: " + err.data.message);
-    } else {
-      alert("Transaction failed. See console for more info.");
-    }
-  }
+  } 
 });
