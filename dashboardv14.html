@@ -225,12 +225,15 @@
         </div>
   
         <div class="card rewards-card">
-          <h3>🌟 Points & Rewards</h3>
-          <p><strong>Total Points:</strong> 1,250</p>
-          <p><strong>Today:</strong> +120</p>
-          <div class="progress"><div class="progress-bar" style="width: 75%"></div></div>
-          <p>Next reward at 1500 pts</p>
+        <h3>🌟 Total Rewards</h3>
+        <p><strong>Total ETH earned:</strong> 1,250</p>
+        <p><strong>Today:</strong> +120</p>
+
+        <p><strong>Redeemable now:</strong> <span id="redeemable-now">Calculating…</span></p>
         </div>
+
+
+        
   
         <div class="card quests-card quests">
           <h3>🚀 Daily Quests</h3>
@@ -266,9 +269,14 @@
   const activityLoggerAddress = "0x26E24bfe2A21515eb91Cea4b754FA56067bC70cB";
   const healthIdAddress      = "0x7bC0fC7A7EF15FA2839c32F6a3b04B2edD3e3e68";
 
+  
   const activityLoggerAbi = [
-    "function getUserActivities(address user) view returns ((uint256 distanceKmX100,uint256 elevationGainM,bool isRewarded)[])"
-  ];
+  "function getUserActivities(address user) view returns ((uint256 distanceKmX100,uint256 elevationGainM,bool isRewarded)[])",
+  "function getThresholds() view returns (uint256 distanceThreshold, uint256 elevationThreshold)",
+  "function rewardAmount() view returns (uint256)",
+  "event ActivityLogged(address indexed user, uint256 distanceKmX100, uint256 elevationGainM, uint256 timestamp)",
+  "event RewardRedeemed(address indexed user, uint256 amount, uint256 eligibleCount)"
+];
 
   // Only what we use: users(), getUserInsurerInfo(), UserRegistered
   const healthIdAbi = [
@@ -351,7 +359,20 @@
 
       // Health ID
       await loadHealthID(user, provider);
+      await loadRedeemableValue(provider, user);
+      
       fetchMockData();
+
+       // Auto-refresh when activity is logged or user redeems
+    const logger = new ethers.Contract(activityLoggerAddress, activityLoggerAbi, provider);
+    logger.on("ActivityLogged", (u) => {
+      if (u.toLowerCase() === user.toLowerCase()) loadRedeemableValue(provider, user);
+    });
+    logger.on("RewardRedeemed", (u) => {
+      if (u.toLowerCase() === user.toLowerCase()) loadRedeemableValue(provider, user);
+    });
+
+      
     } catch (err) {
       console.error(err);
     }
@@ -397,7 +418,44 @@ async function loadHealthID(userAddress, provider) {
         console.error('Failed to fetch mock data:', error);
       }
     }
-  
+
+  // ===== Redeem Reward  Part =====
+
+  async function loadRedeemableValue(provider, userAddress) {
+  try {
+    const logger = new ethers.Contract(activityLoggerAddress, activityLoggerAbi, provider);
+
+    const [activities, [distTh, elevTh], rewardWei] = await Promise.all([
+      logger.getUserActivities(userAddress),
+      logger.getThresholds(),
+      logger.rewardAmount()
+    ]);
+
+    // Count eligible & not-yet-rewarded logs
+    let eligible = 0;
+    for (const a of activities) {
+      const distOK = ethers.BigNumber.from(a.distanceKmX100).gte(distTh);
+      const elevOK = ethers.BigNumber.from(a.elevationGainM).gte(elevTh);
+      const notPaid = !a.isRewarded;
+      if (notPaid && (distOK || elevOK)) eligible++;
+    }
+
+    const totalWei = ethers.BigNumber.from(rewardWei).mul(eligible);
+    const totalEth = ethers.utils.formatEther(totalWei);
+
+    const el = document.getElementById("redeemable-now");
+    el.textContent = eligible > 0 ? `${totalEth} ETH` : "0 ETH";
+
+    // (Optional) disable/enable the Redeem button
+    const headerBtn = document.querySelector(".redeem-btn");
+    if (headerBtn) headerBtn.disabled = eligible === 0;
+
+  } catch (e) {
+    console.error("Failed to load redeemable value:", e);
+    const el = document.getElementById("redeemable-now");
+    if (el) el.textContent = "—";
+  }
+}
   // ===== Boot =====
   window.addEventListener("load", initCharacterStatus);
 </script>
