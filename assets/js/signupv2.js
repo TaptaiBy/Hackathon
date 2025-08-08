@@ -45,7 +45,7 @@ document.getElementById("signupForm").addEventListener("submit", async function 
     }
   ];
 
-  const HEALTHID_ADDRESS = "0xec080955027c09bF04547036776B0392F8C4A3B2";
+  const HEALTHID_ADDRESS = "0x7bC0fC7A7EF15FA2839c32F6a3b04B2edD3e3e68";
 
   try {
     if (!window.ethereum) {
