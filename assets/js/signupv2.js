@@ -17,7 +17,7 @@ document.getElementById("signupForm").addEventListener("submit", async function 
   try {
     // Load ABI and registered insurers
     const [abiResponse, insurersResponse] = await Promise.all([
-      fetch("contracts/HealthID.json"),
+      fetch("contracts/HealthIDv2.json"),
       fetch("assets/data/registered_insurers.json")
     ]);
     const CONTRACT_ABI = await abiResponse.json();
