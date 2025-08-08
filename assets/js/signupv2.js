@@ -161,7 +161,7 @@ document.getElementById("signupForm").addEventListener("submit", async function 
 
   // Embedded insurer address map
   const insurerMap = {
-    "AIA": "0xe0CB133a21D7BFf21C2F4600015d29096C5B754B",
+    "aia": "0xe0CB133a21D7BFf21C2F4600015d29096C5B754B",
     "prudential": "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
     "metlife": "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"
   };
