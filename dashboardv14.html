@@ -384,8 +384,19 @@ async function loadHealthID(userAddress, provider) {
     console.error("Error loading Health ID:", error);
   }
 }
-
-
+  // ===== Daily Acitivity Part =====
+   async function fetchMockData() {
+      try {
+        const response = await fetch('static/assets/mock/mockhealthdata.json');
+        const data = await response.json();
+        document.querySelector('#steps').textContent = data.steps.toLocaleString();
+        document.querySelector('#sleep').textContent = `${data.sleep} hrs`;
+        document.querySelector('#calories').textContent = `${data.calories} kcal`;
+      } catch (error) {
+        console.error('Failed to fetch mock data:', error);
+      }
+    }
+  
   // ===== Boot =====
   window.addEventListener("load", initCharacterStatus);
 </script>
