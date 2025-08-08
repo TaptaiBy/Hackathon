@@ -8,16 +8,21 @@ document.getElementById("signupForm").addEventListener("submit", async function 
   const insurerKey = document.getElementById("insurer").value.toLowerCase();
   const policyValueEth = document.getElementById("policy-value").value;
 
+  if (!window.ethereum) {
+    alert("Please install MetaMask");
+    return;
+  }
+
   // Validate ETH input before converting to wei
   if (isNaN(policyValueEth) || Number(policyValueEth) <= 0) {
     alert("Please enter a valid Policy Value in ETH");
     return;
   }
 
-  const policyValue = (Number(policyValueEth) * 1e18).toString(); // Convert ETH to wei
+  const policyValue = (Number(policyValueEth) * 1e18).toString(); // ETH to wei
 
   try {
-    // Load contract ABI and insurer mapping
+    // Load contract ABI and registered insurer mapping
     const [abiResponse, insurersResponse] = await Promise.all([
       fetch("contracts/HealthIDv2.json"),
       fetch("assets/data/registered_insurers.json")
@@ -33,9 +38,11 @@ document.getElementById("signupForm").addEventListener("submit", async function 
 
     console.log(`Selected Insurer: ${insurerKey}, Wallet: ${insurerAddress}`);
 
+    // Set addresses
     const CONTRACT_ADDRESS = "0xea5a13f401312eE5F3Ad06485E00ea0b7aC00CB8"; // HealthID contract
     const REWARD_POOL_ADDRESS = "0x37a79760bd8658e09c59fC880D3C94EC6807e844"; // RewardPoolManager
 
+    // Minimal ABI for getInsurerProfile
     const REWARD_POOL_ABI = [
       {
         "inputs": [{ "internalType": "address", "name": "insurer", "type": "address" }],
@@ -52,36 +59,23 @@ document.getElementById("signupForm").addEventListener("submit", async function 
       }
     ];
 
-    // Connect to MetaMask
-    if (!window.ethereum) {
-      alert("Please install MetaMask");
-      return;
-    }
-
     const accounts = await ethereum.request({ method: "eth_requestAccounts" });
     const account = accounts[0];
     console.log("MetaMask connected, account:", account);
 
     const web3 = new Web3(window.ethereum);
 
-    // Validate insurer on-chain using getInsurerProfile()
+    // Validate insurer via on-chain profile
     const rewardPool = new web3.eth.Contract(REWARD_POOL_ABI, REWARD_POOL_ADDRESS);
     const insurerData = await rewardPool.methods.getInsurerProfile(insurerAddress).call();
 
     console.log("On-chain insurer profile:", insurerData);
-
     if (!insurerData.isActive) {
       alert("This insurer is not active. Cannot proceed.");
       return;
     }
 
-    // Optional: Show insurer info in UI
-    console.log(`Insurer name: ${insurerData.name}`);
-    console.log(`License: ${insurerData.licenseInfo}`);
-    console.log(`Registered at: ${new Date(insurerData.registeredAt * 1000).toLocaleString()}`);
-    console.log(`Insurer balance: ${insurerData.balance} wei`);
-
-    // Connect to HealthID contract
+    // Load HealthID contract
     const contract = new web3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
 
     // Check if contract is paused
@@ -92,31 +86,40 @@ document.getElementById("signupForm").addEventListener("submit", async function 
       return;
     }
 
-    // Register user
-    await contract.methods.registerUser(
-      fullName,
-      dob,
-      policyNumber,
-      policyValue,
-      insurerAddress
-    ).send({ from: account });
+    // Log all inputs before sending
+    console.log("Sending registration with:");
+    console.log({ fullName, dob, policyNumber, policyValue, insurerAddress });
 
-    // Success message
-    Swal.fire({
-      icon: 'success',
-      title: 'Registered!',
-      text: 'Redirecting to login...',
-      showConfirmButton: false,
-      timer: 2000,
-      position: 'center',
-      timerProgressBar: true,
-      didClose: () => {
-        window.location.href = 'signinv2.html';
-      }
-    });
+    // Try registerUser transaction
+    try {
+      await contract.methods.registerUser(
+        fullName,
+        dob,
+        policyNumber,
+        policyValue,
+        insurerAddress
+      ).send({ from: account });
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Registered!',
+        text: 'Redirecting to login...',
+        showConfirmButton: false,
+        timer: 2000,
+        position: 'center',
+        timerProgressBar: true,
+        didClose: () => {
+          window.location.href = 'signinv2.html';
+        }
+      });
+    } catch (err) {
+      console.error("Contract reverted:", err);
+      const reason = err?.error?.message || err?.data?.message || err?.message || "Execution reverted";
+      alert("Transaction reverted:\n\n" + reason);
+    }
 
   } catch (err) {
     console.error("Error during signup:", err);
-    alert(`Something went wrong: ${err.message}`);
+    alert("Unexpected error. See console for details.");
   }
 });
