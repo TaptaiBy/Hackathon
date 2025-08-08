@@ -5,7 +5,10 @@ document.getElementById("signupForm").addEventListener("submit", async function 
   const fullName = document.getElementById("name").value;
   const dob = parseInt(document.getElementById("dob").value);
   const policyNumber = document.getElementById("policy-number").value;
-  const policyValue = parseInt(document.getElementById("policy-value").value, 10);
+  const web3 = new Web3(window.ethereum); // Make sure this is declared before using it
+  const policyValue = document.getElementById("policy-value").value;
+  const policyValue = web3.utils.toWei(policyValueEth, "ether");
+
   const insurerKey = document.getElementById("insurer").value.toLowerCase();
 
   // Validate policy value
