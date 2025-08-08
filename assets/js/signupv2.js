@@ -6,7 +6,6 @@ document.getElementById("signupForm").addEventListener("submit", async function 
   const dob = parseInt(document.getElementById("dob").value);
   const policyNumber = document.getElementById("policy-number").value;
   const insurerKey = document.getElementById("insurer").value.toLowerCase();
-
   const policyValueEth = document.getElementById("policy-value").value;
 
   // Validate ETH input before converting to wei
@@ -15,11 +14,10 @@ document.getElementById("signupForm").addEventListener("submit", async function 
     return;
   }
 
-  const web3 = new Web3(window.ethereum);
-  const policyValue = web3.utils.toWei(policyValueEth, "ether");
+  const policyValue = (Number(policyValueEth) * 1e18).toString(); // Convert ETH to wei
 
   try {
-    // Load ABI and registered insurers
+    // Load contract ABI and insurer mapping
     const [abiResponse, insurersResponse] = await Promise.all([
       fetch("contracts/HealthIDv2.json"),
       fetch("assets/data/registered_insurers.json")
@@ -32,58 +30,83 @@ document.getElementById("signupForm").addEventListener("submit", async function 
       alert("Selected insurer not registered.");
       return;
     }
+
     console.log(`Selected Insurer: ${insurerKey}, Wallet: ${insurerAddress}`);
-    const CONTRACT_ADDRESS = "0xe0CB133a21D7BFf21C2F4600015d29096C5B754B";
 
-    // Simulate insurer validation (mock)
-    const response = await fetch("assets/mock/insurer.json");
-    const data = await response.json();
-    const isValid = data.valid;
+    const CONTRACT_ADDRESS = "0xea5a13f401312eE5F3Ad06485E00ea0b7aC00CB8"; // HealthID contract
+    const REWARD_POOL_ADDRESS = "0x37a79760bd8658e09c59fC880D3C94EC6807e844"; // RewardPoolManager
 
-    if (isValid) {
-      if (window.ethereum) {
-        const accounts = await ethereum.request({ method: "eth_requestAccounts" });
-        const account = accounts[0];
-        console.log("MetaMask connected, account:", account);
-
-        const contract = new web3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
-
-        // Check if contract is paused
-        const paused = await contract.methods.paused().call();
-        console.log("Paused state:", paused);
-        if (paused) {
-          alert("Contract is currently paused. Cannot register.");
-          return;
-        }
-
-        // Register user
-        await contract.methods.registerUser(
-          fullName,
-          dob,
-          policyNumber,
-          policyValue, // Already in wei
-          insurerAddress
-        ).send({ from: account });
-
-        // Success message
-        Swal.fire({
-          icon: 'success',
-          title: 'Registered!',
-          text: 'Redirecting to login...',
-          showConfirmButton: false,
-          timer: 2000,
-          position: 'center',
-          timerProgressBar: true,
-          didClose: () => {
-            window.location.href = 'signinv2.html';
-          }
-        });
-      } else {
-        alert("Please install MetaMask");
+    const REWARD_POOL_ABI = [
+      {
+        "constant": true,
+        "inputs": [{ "name": "insurer", "type": "address" }],
+        "name": "insurers",
+        "outputs": [
+          { "name": "name", "type": "string" },
+          { "name": "licenseInfo", "type": "string" },
+          { "name": "isActive", "type": "bool" },
+          { "name": "registeredAt", "type": "uint256" }
+        ],
+        "type": "function"
       }
-    } else {
-      alert("Policy validation failed. Cannot proceed.");
+    ];
+
+    // Connect to MetaMask
+    if (!window.ethereum) {
+      alert("Please install MetaMask");
+      return;
     }
+
+    const accounts = await ethereum.request({ method: "eth_requestAccounts" });
+    const account = accounts[0];
+    console.log("MetaMask connected, account:", account);
+
+    const web3 = new Web3(window.ethereum);
+
+    // Validate insurer on-chain
+    const rewardPool = new web3.eth.Contract(REWARD_POOL_ABI, REWARD_POOL_ADDRESS);
+    const insurerData = await rewardPool.methods.insurers(insurerAddress).call();
+    console.log("On-chain insurer data:", insurerData);
+
+    if (!insurerData.isActive) {
+      alert("This insurer is not active. Cannot proceed.");
+      return;
+    }
+
+    // Connect to HealthID contract
+    const contract = new web3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
+
+    // Check if contract is paused
+    const paused = await contract.methods.paused().call();
+    console.log("Paused state:", paused);
+    if (paused) {
+      alert("Contract is currently paused. Cannot register.");
+      return;
+    }
+
+    // Register user
+    await contract.methods.registerUser(
+      fullName,
+      dob,
+      policyNumber,
+      policyValue, // Already in wei
+      insurerAddress
+    ).send({ from: account });
+
+    // Success message
+    Swal.fire({
+      icon: 'success',
+      title: 'Registered!',
+      text: 'Redirecting to login...',
+      showConfirmButton: false,
+      timer: 2000,
+      position: 'center',
+      timerProgressBar: true,
+      didClose: () => {
+        window.location.href = 'signinv2.html';
+      }
+    });
+
   } catch (err) {
     console.error("Error during signup:", err);
     alert(`Something went wrong: ${err.message}`);
