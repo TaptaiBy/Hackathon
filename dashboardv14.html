@@ -271,12 +271,14 @@
 
   
   const activityLoggerAbi = [
-  "function getUserActivities(address user) view returns ((uint256 distanceKmX100,uint256 elevationGainM,bool isRewarded)[])",
-  "function getThresholds() view returns (uint256 distanceThreshold, uint256 elevationThreshold)",
+  "function getUserActivities(address user) view returns ((uint256 distanceKmX100,uint256 elevationGainM,uint256 timestamp,bool isRewarded)[])",
+  "function getThresholds() view returns (uint256 distanceThreshold,uint256 elevationThreshold)",
   "function rewardAmount() view returns (uint256)",
-  "event ActivityLogged(address indexed user, uint256 distanceKmX100, uint256 elevationGainM, uint256 timestamp)",
-  "event RewardRedeemed(address indexed user, uint256 amount, uint256 eligibleCount)"
+  "function redeemReward()",
+  "event ActivityLogged(address indexed user,uint256 distanceKmX100,uint256 elevationGainM,uint256 timestamp)",
+  "event RewardRedeemed(address indexed user,uint256 amount,uint256 eligibleCount)"
 ];
+
 
   // Only what we use: users(), getUserInsurerInfo(), UserRegistered
   const healthIdAbi = [
@@ -446,16 +448,32 @@ async function loadHealthID(userAddress, provider) {
     const el = document.getElementById("redeemable-now");
     el.textContent = eligible > 0 ? `${totalEth} ETH` : "0 ETH";
 
-    // (Optional) disable/enable the Redeem button
-    const headerBtn = document.querySelector(".redeem-btn");
-    if (headerBtn) headerBtn.disabled = eligible === 0;
-
-  } catch (e) {
+     } catch (e) {
     console.error("Failed to load redeemable value:", e);
     const el = document.getElementById("redeemable-now");
     if (el) el.textContent = "—";
   }
 }
+ // ===== Redeem Reward Header Part =====
+  async function redeemAllEligible() {
+  try {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    await provider.send("eth_requestAccounts", []);
+    const signer = provider.getSigner();
+    const contract = new ethers.Contract(activityLoggerAddress, activityLoggerAbi, signer);
+
+    const tx = await contract.redeemReward();
+    document.querySelector(".redeem-btn").disabled = true;
+    await tx.wait();
+
+    // Refresh UI
+    const user = await signer.getAddress();
+    await loadRedeemableValue(provider, user);
+  } catch (e) {
+    console.error("Redeem failed:", e);
+  }
+}
+
   // ===== Boot =====
   window.addEventListener("load", initCharacterStatus);
 </script>
