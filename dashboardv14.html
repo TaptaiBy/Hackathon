@@ -266,39 +266,29 @@ const activityLoggerAbi = [
 ];
 
 const healthIdAbi = [
-  {
-    "inputs":[{"internalType":"address","name":"","type":"address"}],
-    "name":"users",
-    "outputs":[
-      {"internalType":"address","name":"user","type":"address"},
-      {"internalType":"string","name":"name","type":"string"},
-      {"internalType":"uint256","name":"dob","type":"uint256"},
-      {"internalType":"string","name":"policyNo","type":"string"},
-      {"internalType":"uint256","name":"contractValue","type":"uint256"},
-      {"internalType":"address","name":"insurer","type":"address"}
-    ],
-    "stateMutability":"view","type":"function"
-  },
-  {
-    "inputs":[{"internalType":"address","name":"user","type":"address"}],
-    "name":"getUserInsurerInfo",
-    "outputs":[
-      {"internalType":"string","name":"insurerName","type":"string"},
-      {"internalType":"address","name":"insurerAddress","type":"address"},
-      {"internalType":"string","name":"licenseInfo","type":"string"}
-    ],
-    "stateMutability":"view","type":"function"
-  }
+  {"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"users","outputs":[
+    {"internalType":"address","name":"user","type":"address"},
+    {"internalType":"string","name":"name","type":"string"},
+    {"internalType":"uint256","name":"dob","type":"uint256"},
+    {"internalType":"string","name":"policyNo","type":"string"},
+    {"internalType":"uint256","name":"contractValue","type":"uint256"},
+    {"internalType":"address","name":"insurer","type":"address"}],
+    "stateMutability":"view","type":"function"},
+  {"inputs":[{"internalType":"address","name":"user","type":"address"}],
+   "name":"getUserInsurerInfo","outputs":[
+    {"internalType":"string","name":"insurerName","type":"string"},
+    {"internalType":"address","name":"insurerAddress","type":"address"},
+    {"internalType":"string","name":"licenseInfo","type":"string"}],
+   "stateMutability":"view","type":"function"}
 ];
 
-/* =================== Small helpers =================== */
+/* =================== Helpers & constants =================== */
 const XP_PER_ACTIVITY = 10;
 const XP_PER_LEVEL = 100;
 
 function formatDobValue(dobBig) {
   const val = typeof dobBig === "object" && dobBig?._isBigNumber
-    ? parseInt(dobBig.toString(), 10)
-    : Number(dobBig);
+    ? parseInt(dobBig.toString(), 10) : Number(dobBig);
   if (!val || Number.isNaN(val)) return "Not set";
   const date = val > 10000000000 ? new Date(val) : new Date(val * 1000);
   return date.toLocaleDateString("en-GB");
@@ -313,9 +303,9 @@ async function initCharacterStatus() {
     const signer = provider.getSigner();
     const user = await signer.getAddress();
 
-    // Character XP bar
-    const activity = new ethers.Contract(activityLoggerAddress, activityLoggerAbi, provider);
-    const acts = await activity.getUserActivities(user);
+    // XP/Level
+    const loggerRead = new ethers.Contract(activityLoggerAddress, activityLoggerAbi, provider);
+    const acts = await loggerRead.getUserActivities(user);
     const xp = acts.length * XP_PER_ACTIVITY;
     const level = Math.floor(xp / XP_PER_LEVEL) + 1;
     const pct = Math.floor((xp % XP_PER_LEVEL) / XP_PER_LEVEL * 100);
@@ -328,11 +318,14 @@ async function initCharacterStatus() {
     await loadOverallEarnings(provider, user);
     await loadRedeemableValue(provider, user);
 
-    // Mock daily activity block (steps/sleep/calories)
+    // Mock stats
     fetchMockData();
 
-    // Quests list + Activity calendar (and filter)
-    await initQuestsUI(provider, user);
+    // Quests: render cards + set ribbon + today status + calendar
+    renderQuestCards();
+    await setQuestRibbonAmounts(provider);
+    await updateDailyQuestStatus(provider, user);
+    await initCalendarFromActivities(provider, user);
 
     // Live updates
     const logger = new ethers.Contract(activityLoggerAddress, activityLoggerAbi, provider);
@@ -340,7 +333,8 @@ async function initCharacterStatus() {
       if (u.toLowerCase() === user.toLowerCase()) {
         loadOverallEarnings(provider, user);
         loadRedeemableValue(provider, user);
-        initQuestsUI(provider, user);
+        updateDailyQuestStatus(provider, user);
+        initCalendarFromActivities(provider, user);
       }
     });
     logger.on("RewardRedeemed", (u) => {
@@ -349,7 +343,6 @@ async function initCharacterStatus() {
         loadRedeemableValue(provider, user);
       }
     });
-
   } catch (err) {
     console.error(err);
   }
@@ -427,14 +420,11 @@ async function loadOverallEarnings(provider, userAddress) {
     const midnight = new Date(); midnight.setHours(0,0,0,0);
     const todayStart = Math.floor(midnight.getTime() / 1000);
 
-    let totalEligible = 0;
-    let todayEligible = 0;
-
+    let totalEligible = 0, todayEligible = 0;
     for (const a of activities) {
       const dist = a.distanceKmX100 ?? a[0];
       const elev = a.elevationGainM ?? a[1];
       const ts   = Number(a.timestamp ?? a[2]);
-
       const eligible = ethers.BigNumber.from(dist).gte(distTh) || ethers.BigNumber.from(elev).gte(elevTh);
       if (eligible) {
         totalEligible++;
@@ -444,7 +434,6 @@ async function loadOverallEarnings(provider, userAddress) {
 
     const totalWei = ethers.BigNumber.from(rewardWei).mul(totalEligible);
     const todayWei = ethers.BigNumber.from(rewardWei).mul(todayEligible);
-
     document.getElementById("total-earned").textContent = `${ethers.utils.formatEther(totalWei)} ETH`;
     document.getElementById("earned-today").textContent = `+${ethers.utils.formatEther(todayWei)} ETH`;
 
@@ -473,7 +462,8 @@ async function redeemAllEligible() {
     const user = await signer.getAddress();
     await loadRedeemableValue(provider, user);
     await loadOverallEarnings(provider, user);
-    await initQuestsUI(provider, user);
+    await updateDailyQuestStatus(provider, user);
+    await initCalendarFromActivities(provider, user);
 
   } catch (e) {
     console.error("Redeem failed:", e);
@@ -482,8 +472,74 @@ async function redeemAllEligible() {
   }
 }
 
-/* =================== Quests + Activity Calendar =================== */
-const questTypes = ["run5k", "elev100m", "sleep8h", "ex30m"];
+/* =================== Quest Cards (cool UI) =================== */
+let QUESTS = [
+  { id:'q-5k',    reward:'— ETH', title:'Daily', desc:'Run 5 km',            goal:1, progress:0, done:false },
+  { id:'q-elev',  reward:'— ETH', title:'Daily', desc:'Step up 100 m',       goal:1, progress:0, done:false },
+  { id:'q-sleep', reward:'— ETH', title:'Daily', desc:'Sleep 8 hours',       goal:1, progress:0, done:false }, // static
+  { id:'q-ex30',  reward:'— ETH', title:'Daily', desc:'Exercise 30 minutes', goal:1, progress:0, done:false }  // static
+];
+
+function renderQuestCards(){
+  const wrap = document.getElementById("daily-quests");
+  if (!wrap) return;
+  wrap.classList.add("quest-grid");
+  wrap.innerHTML = QUESTS.map(q => `
+    <div class="quest-card ${q.done ? 'done':''}" id="${q.id}">
+      <div class="ribbon"><span class="coin">🪙</span><span class="amount">${q.reward}</span></div>
+      <div class="title">${q.title}</div>
+      <div class="desc">${q.desc}</div>
+      <div class="progress"><div class="bar" style="width:${Math.min(100, Math.round((q.progress/q.goal)*100))}%"></div></div>
+      <div class="count"><span>${q.progress} / ${q.goal}</span><span></span></div>
+    </div>
+  `).join('');
+}
+
+function setQuestProgress(id, progress){
+  const q = QUESTS.find(x => x.id === id); if(!q) return;
+  q.progress = Math.min(progress, q.goal); q.done = q.progress >= q.goal;
+  const el = document.getElementById(id); if(!el) return;
+  el.classList.toggle("done", q.done);
+  el.querySelector(".bar").style.width = `${Math.min(100, Math.round((q.progress/q.goal)*100))}%`;
+  el.querySelector(".count").firstElementChild.textContent = `${q.progress} / ${q.goal}`;
+}
+
+// Pull rewardAmount() and print as "0.001 ETH" on all ribbons
+async function setQuestRibbonAmounts(provider){
+  try {
+    const logger = new ethers.Contract(activityLoggerAddress, activityLoggerAbi, provider);
+    const rewardWei = await logger.rewardAmount();
+    const text = `${ethers.utils.formatEther(rewardWei)} ETH`;
+    QUESTS.forEach(q => q.reward = text);
+    document.querySelectorAll('.ribbon .amount').forEach(el => el.textContent = text);
+  } catch(e){ console.error("setQuestRibbonAmounts failed", e); }
+}
+
+// Today-only completion for Run 5 km & Step up 100 m
+async function updateDailyQuestStatus(provider, user){
+  try {
+    const logger = new ethers.Contract(activityLoggerAddress, activityLoggerAbi, provider);
+    const activities = await logger.getUserActivities(user);
+    const midnight = new Date(); midnight.setHours(0,0,0,0);
+    const todayStart = Math.floor(midnight.getTime()/1000);
+
+    let prog5k = 0, progElev = 0;
+    for(const a of activities){
+      const dist = a.distanceKmX100 ?? a[0]; // x100
+      const elev = a.elevationGainM ?? a[1];
+      const ts   = Number(a.timestamp ?? a[2]);
+      if (ts < todayStart) continue;
+      if (ethers.BigNumber.from(dist).gte(500)) prog5k = 1;
+      if (ethers.BigNumber.from(elev).gte(100)) progElev = 1;
+      if (prog5k && progElev) break;
+    }
+    setQuestProgress('q-5k',   prog5k);
+    setQuestProgress('q-elev', progElev);
+    // Sleep 8h & Exercise 30m remain static (0/1) until you add logic
+  } catch(e){ console.error("updateDailyQuestStatus failed", e); }
+}
+
+/* =================== Activity Calendar (uses same quest tags) =================== */
 const questLabels = {
   run5k:   "🏁 Run 5 km",
   elev100m:"⛰️ Step up 100 m",
@@ -491,20 +547,18 @@ const questLabels = {
   ex30m:   "💪 Exercise 30 minutes",
 };
 
-// Tags per activity based on thresholds
 function tagsForActivity(a) {
-  const dist = a.distanceKmX100 ?? a[0]; // x100 (500 = 5.00 km)
-  const elev = a.elevationGainM ?? a[1]; // meters
+  const dist = a.distanceKmX100 ?? a[0];
+  const elev = a.elevationGainM ?? a[1];
   const tags = [];
   if (ethers.BigNumber.from(dist).gte(500)) tags.push("run5k");
   if (ethers.BigNumber.from(elev).gte(100)) tags.push("elev100m");
-  // sleep8h & ex30m are placeholders for now (add logic later if needed)
+  // sleep8h / ex30m skipped (placeholders)
   return tags;
 }
 
-// YYYY-MM-DD -> Set<questTag>
 function buildActivityMap(activities) {
-  const map = new Map();
+  const map = new Map(); // "YYYY-MM-DD" -> Set(tags)
   for (const a of activities) {
     const ts = Number(a.timestamp ?? a[2]);
     const d = new Date(ts * 1000);
@@ -518,33 +572,9 @@ function buildActivityMap(activities) {
   return map;
 }
 
-function renderDailyQuestList(completedToday) {
-  const questList = document.getElementById("daily-quests");
-  if (!questList) return;
-  questList.innerHTML = "";
-  for (const type of questTypes) {
-    const done = completedToday.has(type);
-    const li = document.createElement("li");
-    li.innerHTML = `
-      <div style="
-        background: ${done ? '#d1e7dd' : '#f1f1f1'};
-        color: ${done ? '#155724' : '#333'};
-        padding: 0.75rem 1rem;
-        border-radius: 8px;
-        margin-bottom: 0.5rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-weight: 500;">
-        <span>${questLabels[type]}</span>
-        ${done ? '✅' : ''}
-      </div>`;
-    questList.appendChild(li);
-  }
-}
-
 function renderCalendar(activityMap, filter = "all") {
   const calendarEl = document.getElementById("activity-calendar");
+  if (!calendarEl) return;
   calendarEl.innerHTML = "";
   const weekdays = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
   for (const day of weekdays) {
@@ -570,24 +600,10 @@ function renderCalendar(activityMap, filter = "all") {
   }
 }
 
-async function initQuestsUI(provider, userAddress) {
+async function initCalendarFromActivities(provider, user) {
   const logger = new ethers.Contract(activityLoggerAddress, activityLoggerAbi, provider);
-  const activities = await logger.getUserActivities(userAddress);
-
+  const activities = await logger.getUserActivities(user);
   const activityMap = buildActivityMap(activities);
-
-  // Completed today (local midnight)
-  const midnight = new Date(); midnight.setHours(0,0,0,0);
-  const todayStart = Math.floor(midnight.getTime()/1000);
-  const completedToday = new Set();
-  for (const a of activities) {
-    const ts = Number(a.timestamp ?? a[2]);
-    if (ts < todayStart) continue;
-    tagsForActivity(a).forEach(t => completedToday.add(t));
-  }
-
-  // Render list + calendar + filter
-  renderDailyQuestList(completedToday);
   renderCalendar(activityMap);
   const sel = document.getElementById("quest-filter");
   sel?.addEventListener("change", e => renderCalendar(activityMap, e.target.value));
@@ -596,6 +612,7 @@ async function initQuestsUI(provider, userAddress) {
 /* =================== Go =================== */
 window.addEventListener("load", initCharacterStatus);
 </script>
+
 
 
 
