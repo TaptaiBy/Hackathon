@@ -226,11 +226,11 @@
   
         <div class="card rewards-card">
         <h3>🌟 Total Rewards</h3>
-        <p><strong>Total ETH earned:</strong> 1,250</p>
-        <p><strong>Today:</strong> +120</p>
-
+        <p><strong>Total ETH earned:</strong> <span id="total-earned">—</span></p>
+        <p><strong>Today:</strong> <span id="earned-today">—</span></p>
         <p><strong>Redeemable now:</strong> <span id="redeemable-now">Calculating…</span></p>
         </div>
+
 
 
         
@@ -362,7 +362,7 @@
       // Health ID
       await loadHealthID(user, provider);
       await loadRedeemableValue(provider, user);
-      
+      await loadRewardHistory(provider, user); 
       fetchMockData();
 
        // Auto-refresh when activity is logged or user redeems
@@ -454,6 +454,50 @@ async function loadHealthID(userAddress, provider) {
     if (el) el.textContent = "—";
   }
 }
+  
+  async function loadRewardHistory(provider, userAddress) {
+  try {
+    const logger = new ethers.Contract(activityLoggerAddress, activityLoggerAbi, provider);
+
+    // Filter by indexed user
+    const filter = logger.filters.RewardRedeemed(userAddress);
+
+    // Query in chunks (some Holesky RPCs hate huge ranges)
+    const latest = await provider.getBlockNumber();
+    const step = 10_000;
+    let logs = [];
+    for (let from = 0; from <= latest; from += step) {
+      const to = Math.min(from + step, latest);
+      const chunk = await logger.queryFilter(filter, from, to);
+      if (chunk.length) logs = logs.concat(chunk);
+    }
+
+    // Sum lifetime & today's
+    let totalWei = ethers.BigNumber.from(0);
+    let todayWei = ethers.BigNumber.from(0);
+    const midnight = new Date(); midnight.setHours(0,0,0,0);
+    const todayStart = Math.floor(midnight.getTime() / 1000);
+
+    // Need timestamps — fetch blocks for each log
+    const blocks = await Promise.all(logs.map(l => provider.getBlock(l.blockNumber)));
+
+    logs.forEach((log, i) => {
+      const amt = log.args.amount; // BigNumber
+      totalWei = totalWei.add(amt);
+      if (blocks[i].timestamp >= todayStart) todayWei = todayWei.add(amt);
+    });
+
+    document.getElementById("total-earned").textContent = `${ethers.utils.formatEther(totalWei)} ETH`;
+    document.getElementById("earned-today").textContent = `+${ethers.utils.formatEther(todayWei)} ETH`;
+  } catch (e) {
+    console.error("Failed to load reward history:", e);
+    const te = document.getElementById("total-earned");
+    const td = document.getElementById("earned-today");
+    if (te) te.textContent = "—";
+    if (td) td.textContent = "—";
+  }
+}
+
  // ===== Redeem Reward Header Part =====
   async function redeemAllEligible() {
   try {
@@ -469,6 +513,7 @@ async function loadHealthID(userAddress, provider) {
     // Refresh UI
     const user = await signer.getAddress();
     await loadRedeemableValue(provider, user);
+    await loadRewardHistory(provider, user); 
   } catch (e) {
     console.error("Redeem failed:", e);
   }
