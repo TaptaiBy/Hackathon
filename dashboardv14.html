@@ -116,68 +116,34 @@
   .quest-status { opacity:.8; }
 
   /* ===== THEME-ALIGNED QUEST CARDS (white + blue) ===== */
-  .quest-grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(220px, 1fr));
-    gap: 1rem;
-  }
-  @media (max-width: 1200px){ .quest-grid { grid-template-columns: repeat(2, minmax(220px, 1fr)); } }
-  @media (max-width: 640px){ .quest-grid { grid-template-columns: 1fr; } }
+/* Quest cards tuned to your theme */
+.quest-grid{
+  display:grid;grid-template-columns:repeat(4,minmax(220px,1fr));gap:1rem
+}
+@media (max-width:1200px){.quest-grid{grid-template-columns:repeat(2,minmax(220px,1fr))}}
+@media (max-width:640px){.quest-grid{grid-template-columns:1fr}}
 
-  .quest-card {
-    position: relative;
-    background: #ffffff;
-    border-radius: 12px;
-    padding: 16px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-    color: #333;
-    transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-  }
-  .quest-card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08); }
+.quest-card{
+  position:relative;background:#fff;border-radius:14px;
+  box-shadow:0 8px 24px rgba(0,0,0,.08);padding:18px;color:#222
+}
+.quest-card .ribbon{
+  position:absolute;top:-14px;left:20px;display:flex;align-items:center;gap:.5rem;
+  background:#5a382b;color:#fff;border-radius:12px;padding:6px 12px 7px;
+  box-shadow:0 3px 0 rgba(0,0,0,.25), 0 6px 14px rgba(0,0,0,.15)
+}
+.ribbon .coin{font-size:1rem}
+.ribbon .amount{font-weight:800;letter-spacing:.2px}
 
-  .quest-card .ribbon {
-    position: absolute;
-    top: -12px;
-    left: 16px;
-    background: #ffcc4d;       /* soft gold coin tag */
-    color: #333;
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-weight: 600;
-    font-size: 0.9rem;
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-  }
-  .quest-card .ribbon .coin { font-size: 1rem; }
+.quest-card .title{font-weight:800;font-size:1.05rem;margin:18px 0 6px}
+.quest-card .desc{font-size:.95rem;color:#666}
 
-  .quest-card .title { font-weight: 700; font-size: 1rem; margin: 14px 0 6px 0; }
-  .quest-card .desc  { font-size: 0.9rem; color: #666; }
+.quest-card .progress{background:#e9ecef;border-radius:999px;overflow:hidden;height:10px;margin-top:8px}
+.quest-card .bar{height:100%;width:0%;background:#2a2aff;transition:width .3s ease}
+.quest-card.done .bar{background:#22c55e}
 
-  .quest-card .progress {
-    background: #e9ecef;
-    border-radius: 999px;
-    overflow: hidden;
-    height: 8px;
-    margin-top: 6px;
-  }
-  .quest-card .bar {
-    height: 100%;
-    width: 0%;
-    background: #2a2aff; /* brand blue for active progress */
-    transition: width 0.3s ease;
-  }
-  .quest-card.done .bar { background: #22c55e; } /* green when complete */
+.quest-card .count{display:flex;justify-content:space-between;margin-top:8px;font-weight:700;color:#444}
 
-  .quest-card .count {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 6px;
-    font-weight: 600;
-    font-size: 0.85rem;
-    color: #444;
-  }
 </style>
 
 </head>
@@ -366,10 +332,10 @@ function formatDobValue(dobBig) {
 
 /* =================== Quests state =================== */
 let QUESTS = [
-  { id:'q-5k',    reward:'0.001ETH',  title:'Daily', desc:'Run 5 km',                goal:1, progress:0, done:false },
-  { id:'q-elev',  reward:'0.001ETH',  title:'Daily', desc:'Step up 100 m',           goal:1, progress:0, done:false },
-  { id:'q-sleep', reward:'0.001ETH',  title:'Daily', desc:'Sleep 8 hours',           goal:1, progress:0, done:false }, // static
-  { id:'q-ex30',  reward:'0.001ETH', title:'Daily', desc:'Exercise 30 minutes',     goal:1, progress:0, done:false }  // static
+  { id:'q-5k',    reward:'0.001 ETH',  title:'Daily', desc:'Run 5 km',                goal:1, progress:0, done:false },
+  { id:'q-elev',  reward:'0.001 ETH',  title:'Daily', desc:'Step up 100 m',           goal:1, progress:0, done:false },
+  { id:'q-sleep', reward:'0.001 ETH',  title:'Daily', desc:'Sleep 8 hours',           goal:1, progress:0, done:false }, // static
+  { id:'q-ex30',  reward:'0.001 ETH', title:'Daily', desc:'Exercise 30 minutes',     goal:1, progress:0, done:false }  // static
 ];
 
 function renderQuestCards(){
