@@ -235,17 +235,12 @@
           <h3>📅 Activity Calendar</h3>
           <div style="margin-bottom: 1rem;">
             <label for="quest-filter" style="margin-right: 0.5rem;">Filter by Quest:</label>
-            <select id="quest-filter">
+              <select id="quest-filter">
               <option value="all">All</option>
-              <option value="walking">🚶 Walking</option>
-              <option value="running30min">🏃‍♂️ Run 30min</option>
-              <option value="running45min">🏃‍♂️ Run 45min</option>
-              <option value="run5k">🏁 Run 5K</option>
-              <option value="run10k">🏁 Run 10K</option>
-              <option value="cycling5k">🚴‍♂️ Cycle 5K</option>
-              <option value="cycling10k">🚴‍♂️ Cycle 10K</option>
-              <option value="gym_checkin">🏋️‍♂️ Gym Check-in</option>
-              <option value="hiit25">🔥 HIIT 25min</option>
+              <option value="run5k">🏁 Run 5 km</option>
+              <option value="elev100m">⛰️ Step up 100 m</option>
+              <option value="sleep8h">💤 Sleep 8 hours</option>
+              <option value="ex30m">💪 Exercise 30 minutes</option>
             </select>
           </div>
           <div id="activity-calendar"></div>
@@ -296,11 +291,10 @@ const healthIdAbi = [
   }
 ];
 
-/* =================== Character constants =================== */
+/* =================== Small helpers =================== */
 const XP_PER_ACTIVITY = 10;
 const XP_PER_LEVEL = 100;
 
-/* =================== Helpers =================== */
 function formatDobValue(dobBig) {
   const val = typeof dobBig === "object" && dobBig?._isBigNumber
     ? parseInt(dobBig.toString(), 10)
@@ -310,65 +304,7 @@ function formatDobValue(dobBig) {
   return date.toLocaleDateString("en-GB");
 }
 
-/* =================== Quest card CSS (injected) =================== */
-(function injectQuestCSS(){
-  const css = document.createElement("style");
-  css.textContent = `
-    .quest-grid{display:grid;grid-template-columns:repeat(4,minmax(220px,1fr));gap:1rem}
-    .quest-card{position:relative;background:#f7efe1;border:3px solid #b08a5a;border-radius:14px;
-      box-shadow:0 6px 20px rgba(0,0,0,.18);padding:14px;color:#2c2419}
-    .quest-card .ribbon{position:absolute;top:-12px;left:12px;background:#8b3f1f;color:#fff;
-      padding:6px 10px;border-radius:8px;box-shadow:0 3px 0 rgba(0,0,0,.25);font-weight:700;display:flex;align-items:center;gap:.4rem}
-    .quest-card .ribbon .coin{font-size:1.1rem}
-    .quest-card .title{font-weight:800;font-size:1rem;margin:18px 0 6px 0;letter-spacing:.2px}
-    .quest-card .desc{font-size:.95rem;margin:0 0 10px 0}
-    .quest-card .progress{background:#d7c7a9;border-radius:999px;overflow:hidden;height:12px;margin-top:6px}
-    .quest-card .bar{height:100%;width:0%;background:#5aa54a}
-    .quest-card .count{display:flex;justify-content:space-between;margin-top:6px;font-weight:700}
-    .quest-card.done .bar{background:#2fa24a}
-  `;
-  document.head.appendChild(css);
-})();
-
-/* =================== Quests state =================== */
-let QUESTS = [
-  { id:'q-5k',    reward:'0.001 ETH',  title:'Daily', desc:'Run 5 km',                goal:1, progress:0, done:false },
-  { id:'q-elev',  reward:'0.001 ETH',  title:'Daily', desc:'Step up 100 m',           goal:1, progress:0, done:false },
-  { id:'q-sleep', reward:'0.001 ETH',  title:'Daily', desc:'Sleep 8 hours',           goal:1, progress:0, done:false }, // static
-  { id:'q-ex30',  reward:'0.001 ETH', title:'Daily', desc:'Exercise 30 minutes',     goal:1, progress:0, done:false }  // static
-];
-
-function renderQuestCards(){
-  const wrap = document.getElementById("daily-quests");
-  if(!wrap) return;
-  wrap.classList.add("quest-grid");
-  wrap.innerHTML = QUESTS.map(q => `
-    <div class="quest-card ${q.done ? 'done':''}" id="${q.id}">
-      <div class="ribbon"><span class="coin">🪙</span>${q.reward}</div>
-      <div class="title">${q.title}</div>
-      <div class="desc">${q.desc}</div>
-      <div class="progress"><div class="bar" style="width:${Math.min(100, Math.round((q.progress/q.goal)*100))}%"></div></div>
-      <div class="count"><span>${q.progress} / ${q.goal}</span><span></span></div>
-    </div>
-  `).join('');
-}
-
-function setQuestProgress(id, progress){
-  const q = QUESTS.find(x => x.id === id);
-  if(!q) return;
-  q.progress = Math.min(progress, q.goal);
-  q.done = q.progress >= q.goal;
-
-  const el = document.getElementById(id);
-  if(!el) return;
-  el.classList.toggle("done", q.done);
-  const bar = el.querySelector(".bar");
-  if(bar) bar.style.width = `${Math.min(100, Math.round((q.progress/q.goal)*100))}%`;
-  const count = el.querySelector(".count");
-  if(count) count.firstElementChild.textContent = `${q.progress} / ${q.goal}`;
-}
-
-/* =================== Boot flow =================== */
+/* =================== Boot =================== */
 async function initCharacterStatus() {
   try {
     if (!window.ethereum) throw new Error("Wallet not found");
@@ -377,14 +313,12 @@ async function initCharacterStatus() {
     const signer = provider.getSigner();
     const user = await signer.getAddress();
 
-    // Character status
+    // Character XP bar
     const activity = new ethers.Contract(activityLoggerAddress, activityLoggerAbi, provider);
-    const activities = await activity.getUserActivities(user);
-    const count = activities.length;
-    const xp = count * XP_PER_ACTIVITY;
+    const acts = await activity.getUserActivities(user);
+    const xp = acts.length * XP_PER_ACTIVITY;
     const level = Math.floor(xp / XP_PER_LEVEL) + 1;
-    const xpIntoLevel = xp % XP_PER_LEVEL;
-    const pct = Math.floor((xpIntoLevel / XP_PER_LEVEL) * 100);
+    const pct = Math.floor((xp % XP_PER_LEVEL) / XP_PER_LEVEL * 100);
     document.getElementById("level-value").textContent = level;
     document.getElementById("xp-value").textContent = xp;
     document.querySelector(".progress-bar").style.width = pct + "%";
@@ -394,20 +328,19 @@ async function initCharacterStatus() {
     await loadOverallEarnings(provider, user);
     await loadRedeemableValue(provider, user);
 
-    // Mock daily activity UI
+    // Mock daily activity block (steps/sleep/calories)
     fetchMockData();
 
-    // Quests: render + evaluate for today
-    renderQuestCards();
-    await updateDailyQuestStatus(provider, user);
+    // Quests list + Activity calendar (and filter)
+    await initQuestsUI(provider, user);
 
-    // Live refresh on events
+    // Live updates
     const logger = new ethers.Contract(activityLoggerAddress, activityLoggerAbi, provider);
     logger.on("ActivityLogged", (u) => {
       if (u.toLowerCase() === user.toLowerCase()) {
-        updateDailyQuestStatus(provider, user);
         loadOverallEarnings(provider, user);
         loadRedeemableValue(provider, user);
+        initQuestsUI(provider, user);
       }
     });
     logger.on("RewardRedeemed", (u) => {
@@ -454,7 +387,7 @@ async function fetchMockData() {
   }
 }
 
-/* =================== Rewards: Redeemable now =================== */
+/* =================== Rewards =================== */
 async function loadRedeemableValue(provider, userAddress) {
   try {
     const logger = new ethers.Contract(activityLoggerAddress, activityLoggerAbi, provider);
@@ -471,7 +404,6 @@ async function loadRedeemableValue(provider, userAddress) {
       const notPaid = !(a.isRewarded ?? a[3]);
       if (notPaid && (distOK || elevOK)) eligible++;
     }
-
     const totalWei = ethers.BigNumber.from(rewardWei).mul(eligible);
     document.getElementById("redeemable-now").textContent =
       eligible > 0 ? `${ethers.utils.formatEther(totalWei)} ETH` : "0 ETH";
@@ -483,7 +415,6 @@ async function loadRedeemableValue(provider, userAddress) {
   }
 }
 
-/* =================== Rewards: Overall & Today =================== */
 async function loadOverallEarnings(provider, userAddress) {
   try {
     const logger = new ethers.Contract(activityLoggerAddress, activityLoggerAbi, provider);
@@ -526,7 +457,6 @@ async function loadOverallEarnings(provider, userAddress) {
   }
 }
 
-/* =================== Redeem button =================== */
 async function redeemAllEligible() {
   try {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -543,7 +473,7 @@ async function redeemAllEligible() {
     const user = await signer.getAddress();
     await loadRedeemableValue(provider, user);
     await loadOverallEarnings(provider, user);
-    await updateDailyQuestStatus(provider, user);
+    await initQuestsUI(provider, user);
 
   } catch (e) {
     console.error("Redeem failed:", e);
@@ -552,39 +482,121 @@ async function redeemAllEligible() {
   }
 }
 
-/* =================== Quests: today-only completion for 5km & 100m =================== */
-async function updateDailyQuestStatus(provider, userAddress){
-  try {
-    const logger = new ethers.Contract(activityLoggerAddress, activityLoggerAbi, provider);
-    const activities = await logger.getUserActivities(userAddress);
+/* =================== Quests + Activity Calendar =================== */
+const questTypes = ["run5k", "elev100m", "sleep8h", "ex30m"];
+const questLabels = {
+  run5k:   "🏁 Run 5 km",
+  elev100m:"⛰️ Step up 100 m",
+  sleep8h: "💤 Sleep 8 hours",
+  ex30m:   "💪 Exercise 30 minutes",
+};
 
-    const midnight = new Date(); midnight.setHours(0,0,0,0);
-    const todayStart = Math.floor(midnight.getTime()/1000);
+// Tags per activity based on thresholds
+function tagsForActivity(a) {
+  const dist = a.distanceKmX100 ?? a[0]; // x100 (500 = 5.00 km)
+  const elev = a.elevationGainM ?? a[1]; // meters
+  const tags = [];
+  if (ethers.BigNumber.from(dist).gte(500)) tags.push("run5k");
+  if (ethers.BigNumber.from(elev).gte(100)) tags.push("elev100m");
+  // sleep8h & ex30m are placeholders for now (add logic later if needed)
+  return tags;
+}
 
-    let prog5k = 0, progElev = 0;
+// YYYY-MM-DD -> Set<questTag>
+function buildActivityMap(activities) {
+  const map = new Map();
+  for (const a of activities) {
+    const ts = Number(a.timestamp ?? a[2]);
+    const d = new Date(ts * 1000);
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+    const tags = tagsForActivity(a);
+    if (!tags.length) continue;
+    if (!map.has(key)) map.set(key, new Set());
+    const s = map.get(key);
+    tags.forEach(t => s.add(t));
+  }
+  return map;
+}
 
-    for(const a of activities){
-      const dist = a.distanceKmX100 ?? a[0]; // x100 (500 = 5.00 km)
-      const elev = a.elevationGainM ?? a[1]; // meters
-      const ts   = Number(a.timestamp ?? a[2]);
-      if (ts < todayStart) continue;
-
-      if (ethers.BigNumber.from(dist).gte(500)) prog5k = 1;
-      if (ethers.BigNumber.from(elev).gte(100)) progElev = 1;
-      if (prog5k && progElev) break;
-    }
-
-    setQuestProgress('q-5k',   prog5k);
-    setQuestProgress('q-elev', progElev);
-    // q-sleep & q-ex30 remain static per your request
-  } catch(e){
-    console.error("Failed to update quests:", e);
+function renderDailyQuestList(completedToday) {
+  const questList = document.getElementById("daily-quests");
+  if (!questList) return;
+  questList.innerHTML = "";
+  for (const type of questTypes) {
+    const done = completedToday.has(type);
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <div style="
+        background: ${done ? '#d1e7dd' : '#f1f1f1'};
+        color: ${done ? '#155724' : '#333'};
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: 500;">
+        <span>${questLabels[type]}</span>
+        ${done ? '✅' : ''}
+      </div>`;
+    questList.appendChild(li);
   }
 }
 
-/* =================== Boot =================== */
+function renderCalendar(activityMap, filter = "all") {
+  const calendarEl = document.getElementById("activity-calendar");
+  calendarEl.innerHTML = "";
+  const weekdays = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  for (const day of weekdays) {
+    const label = document.createElement("div");
+    label.textContent = day;
+    label.className = "weekday";
+    calendarEl.appendChild(label);
+  }
+  const today = new Date();
+  const y = today.getFullYear(), m = today.getMonth();
+  const firstDay = new Date(y, m, 1).getDay();
+  const days = new Date(y, m + 1, 0).getDate();
+
+  for (let i = 0; i < firstDay; i++) calendarEl.appendChild(document.createElement("div"));
+
+  for (let d = 1; d <= days; d++) {
+    const key = `${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    const cell = document.createElement("div");
+    cell.textContent = d;
+    const tags = activityMap.get(key);
+    if (tags && (filter === "all" || tags.has(filter))) cell.classList.add("active-day");
+    calendarEl.appendChild(cell);
+  }
+}
+
+async function initQuestsUI(provider, userAddress) {
+  const logger = new ethers.Contract(activityLoggerAddress, activityLoggerAbi, provider);
+  const activities = await logger.getUserActivities(userAddress);
+
+  const activityMap = buildActivityMap(activities);
+
+  // Completed today (local midnight)
+  const midnight = new Date(); midnight.setHours(0,0,0,0);
+  const todayStart = Math.floor(midnight.getTime()/1000);
+  const completedToday = new Set();
+  for (const a of activities) {
+    const ts = Number(a.timestamp ?? a[2]);
+    if (ts < todayStart) continue;
+    tagsForActivity(a).forEach(t => completedToday.add(t));
+  }
+
+  // Render list + calendar + filter
+  renderDailyQuestList(completedToday);
+  renderCalendar(activityMap);
+  const sel = document.getElementById("quest-filter");
+  sel?.addEventListener("change", e => renderCalendar(activityMap, e.target.value));
+}
+
+/* =================== Go =================== */
 window.addEventListener("load", initCharacterStatus);
 </script>
+
 
 
 
