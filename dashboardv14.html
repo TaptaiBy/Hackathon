@@ -155,6 +155,32 @@
     .quest-item { padding: .5rem 0; display:flex; justify-content:space-between; gap:.75rem; }
     .quest-item.done { color: #1e7e34; font-weight: 600; } /* green when done */
     .quest-status { opacity:.8; }
+    /* --- HS-like Quest Cards --- */
+.quest-grid{
+  display:grid;grid-template-columns:repeat(4,minmax(220px,1fr));gap:1rem
+}
+.quest-card{
+  position:relative;background:#f7efe1;border:3px solid #b08a5a;border-radius:14px;
+  box-shadow:0 6px 20px rgba(0,0,0,.18);padding:14px 14px 12px 14px;color:#2c2419
+}
+.quest-card .ribbon{
+  position:absolute;top:-12px;left:12px;background:#8b3f1f;color:#fff;
+  padding:6px 10px;border-radius:8px;box-shadow:0 3px 0 rgba(0,0,0,.25);
+  font-weight:700;display:flex;align-items:center;gap:.4rem
+}
+.quest-card .ribbon .coin{font-size:1.1rem}
+.quest-card .title{
+  font-weight:800;font-size:1rem;margin:22px 0 6px 0;letter-spacing:.2px
+}
+.quest-card .desc{font-size:.95rem;margin:0 0 10px 0}
+.quest-card .progress{
+  background:#d7c7a9;border-radius:999px;overflow:hidden;height:12px;margin-top:6px
+}
+.quest-card .bar{height:100%;width:0%;background:#5aa54a}
+.quest-card .count{display:flex;justify-content:space-between;margin-top:6px;font-weight:700}
+.quest-card.done{filter:saturate(1.05)}
+.quest-card.done .bar{background:#2fa24a}
+
   </style>
 </head>
 <body>
@@ -239,7 +265,7 @@
   
         <div class="card quests-card quests">
           <h3>🚀 Daily Quests</h3>
-          <ul id="daily-quests" style="list-style: none; padding: 0; margin: 0;"></ul>
+          <div id="daily-quests" class="quest-grid"></div>
         </div>
   
         <div class="card quests-card" style="grid-area: streaks;">
@@ -268,7 +294,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 <script>
-/* ===== Addresses & ABIs ===== */
+/* =================== Addresses & ABIs =================== */
 const activityLoggerAddress = "0x26E24bfe2A21515eb91Cea4b754FA56067bC70cB";
 const healthIdAddress      = "0x7bC0fC7A7EF15FA2839c32F6a3b04B2edD3e3e68";
 
@@ -307,11 +333,11 @@ const healthIdAbi = [
   }
 ];
 
-/* ===== Character constants ===== */
+/* =================== Character constants =================== */
 const XP_PER_ACTIVITY = 10;
 const XP_PER_LEVEL = 100;
 
-/* ===== Small helpers ===== */
+/* =================== Helpers =================== */
 function formatDobValue(dobBig) {
   const val = typeof dobBig === "object" && dobBig?._isBigNumber
     ? parseInt(dobBig.toString(), 10)
@@ -321,7 +347,65 @@ function formatDobValue(dobBig) {
   return date.toLocaleDateString("en-GB");
 }
 
-/* ===== Boot flow ===== */
+/* =================== Quest card CSS (injected) =================== */
+(function injectQuestCSS(){
+  const css = document.createElement("style");
+  css.textContent = `
+    .quest-grid{display:grid;grid-template-columns:repeat(4,minmax(220px,1fr));gap:1rem}
+    .quest-card{position:relative;background:#f7efe1;border:3px solid #b08a5a;border-radius:14px;
+      box-shadow:0 6px 20px rgba(0,0,0,.18);padding:14px;color:#2c2419}
+    .quest-card .ribbon{position:absolute;top:-12px;left:12px;background:#8b3f1f;color:#fff;
+      padding:6px 10px;border-radius:8px;box-shadow:0 3px 0 rgba(0,0,0,.25);font-weight:700;display:flex;align-items:center;gap:.4rem}
+    .quest-card .ribbon .coin{font-size:1.1rem}
+    .quest-card .title{font-weight:800;font-size:1rem;margin:18px 0 6px 0;letter-spacing:.2px}
+    .quest-card .desc{font-size:.95rem;margin:0 0 10px 0}
+    .quest-card .progress{background:#d7c7a9;border-radius:999px;overflow:hidden;height:12px;margin-top:6px}
+    .quest-card .bar{height:100%;width:0%;background:#5aa54a}
+    .quest-card .count{display:flex;justify-content:space-between;margin-top:6px;font-weight:700}
+    .quest-card.done .bar{background:#2fa24a}
+  `;
+  document.head.appendChild(css);
+})();
+
+/* =================== Quests state =================== */
+let QUESTS = [
+  { id:'q-5k',    reward:'800',  title:'Daily', desc:'Run 5 km',                goal:1, progress:0, done:false },
+  { id:'q-elev',  reward:'800',  title:'Daily', desc:'Step up 100 m',           goal:1, progress:0, done:false },
+  { id:'q-sleep', reward:'800',  title:'Daily', desc:'Sleep 8 hours',           goal:1, progress:0, done:false }, // static
+  { id:'q-ex30',  reward:'1000', title:'Daily', desc:'Exercise 30 minutes',     goal:1, progress:0, done:false }  // static
+];
+
+function renderQuestCards(){
+  const wrap = document.getElementById("daily-quests");
+  if(!wrap) return;
+  wrap.classList.add("quest-grid");
+  wrap.innerHTML = QUESTS.map(q => `
+    <div class="quest-card ${q.done ? 'done':''}" id="${q.id}">
+      <div class="ribbon"><span class="coin">🪙</span>${q.reward}</div>
+      <div class="title">${q.title}</div>
+      <div class="desc">${q.desc}</div>
+      <div class="progress"><div class="bar" style="width:${Math.min(100, Math.round((q.progress/q.goal)*100))}%"></div></div>
+      <div class="count"><span>${q.progress} / ${q.goal}</span><span></span></div>
+    </div>
+  `).join('');
+}
+
+function setQuestProgress(id, progress){
+  const q = QUESTS.find(x => x.id === id);
+  if(!q) return;
+  q.progress = Math.min(progress, q.goal);
+  q.done = q.progress >= q.goal;
+
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.classList.toggle("done", q.done);
+  const bar = el.querySelector(".bar");
+  if(bar) bar.style.width = `${Math.min(100, Math.round((q.progress/q.goal)*100))}%`;
+  const count = el.querySelector(".count");
+  if(count) count.firstElementChild.textContent = `${q.progress} / ${q.goal}`;
+}
+
+/* =================== Boot flow =================== */
 async function initCharacterStatus() {
   try {
     if (!window.ethereum) throw new Error("Wallet not found");
@@ -338,7 +422,6 @@ async function initCharacterStatus() {
     const level = Math.floor(xp / XP_PER_LEVEL) + 1;
     const xpIntoLevel = xp % XP_PER_LEVEL;
     const pct = Math.floor((xpIntoLevel / XP_PER_LEVEL) * 100);
-
     document.getElementById("level-value").textContent = level;
     document.getElementById("xp-value").textContent = xp;
     document.querySelector(".progress-bar").style.width = pct + "%";
@@ -348,14 +431,14 @@ async function initCharacterStatus() {
     await loadOverallEarnings(provider, user);
     await loadRedeemableValue(provider, user);
 
-    // Daily activity mock (unchanged)
+    // Mock daily activity UI
     fetchMockData();
 
     // Quests: render + evaluate for today
-    loadDailyQuests();
+    renderQuestCards();
     await updateDailyQuestStatus(provider, user);
 
-    // Live refresh on Activity/Reward events
+    // Live refresh on events
     const logger = new ethers.Contract(activityLoggerAddress, activityLoggerAbi, provider);
     logger.on("ActivityLogged", (u) => {
       if (u.toLowerCase() === user.toLowerCase()) {
@@ -376,7 +459,7 @@ async function initCharacterStatus() {
   }
 }
 
-/* ===== HealthID ===== */
+/* =================== HealthID =================== */
 async function loadHealthID(userAddress, provider) {
   try {
     const health = new ethers.Contract(healthIdAddress, healthIdAbi, provider);
@@ -395,20 +478,20 @@ async function loadHealthID(userAddress, provider) {
   }
 }
 
-/* ===== Mock daily activity ===== */
+/* =================== Mock daily activity =================== */
 async function fetchMockData() {
   try {
     const response = await fetch('assets/mock/mockhealthdata.json');
     const data = await response.json();
-    document.querySelector('#steps').textContent   = `${data.steps.toLocaleString()} steps`;
-    document.querySelector('#sleep').textContent   = `${data.sleep} hrs`;
-    document.querySelector('#calories').textContent= `${data.calories} kcal`;
+    document.querySelector('#steps').textContent    = `${data.steps.toLocaleString()} steps`;
+    document.querySelector('#sleep').textContent    = `${data.sleep} hrs`;
+    document.querySelector('#calories').textContent = `${data.calories} kcal`;
   } catch (error) {
     console.error('Failed to fetch mock data:', error);
   }
 }
 
-/* ===== Rewards: Redeemable now (unpaid eligibles) ===== */
+/* =================== Rewards: Redeemable now =================== */
 async function loadRedeemableValue(provider, userAddress) {
   try {
     const logger = new ethers.Contract(activityLoggerAddress, activityLoggerAbi, provider);
@@ -437,7 +520,7 @@ async function loadRedeemableValue(provider, userAddress) {
   }
 }
 
-/* ===== Rewards: Overall earnings (all eligible ever) + Today (eligible since midnight) ===== */
+/* =================== Rewards: Overall & Today =================== */
 async function loadOverallEarnings(provider, userAddress) {
   try {
     const logger = new ethers.Contract(activityLoggerAddress, activityLoggerAbi, provider);
@@ -480,7 +563,7 @@ async function loadOverallEarnings(provider, userAddress) {
   }
 }
 
-/* ===== Redeem button ===== */
+/* =================== Redeem button =================== */
 async function redeemAllEligible() {
   try {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -506,67 +589,40 @@ async function redeemAllEligible() {
   }
 }
 
-/* ===== Quests (render + today-only completion for 5km & 100m) ===== */
-function loadDailyQuests() {
-  const css = document.createElement("style");
-  css.textContent = `
-    .quest-item { padding:.5rem 0; display:flex; justify-content:space-between; gap:.75rem; }
-    .quest-item.done { color:#1e7e34; font-weight:600; }
-    .quest-status { opacity:.85; }
-  `;
-  document.head.appendChild(css);
-
-  const ul = document.getElementById("daily-quests");
-  ul.innerHTML = `
-    <li id="quest-5k"   class="quest-item">🏁 Run 5 km <span class="quest-status">⏳ Not yet</span></li>
-    <li id="quest-elev" class="quest-item">⛰️ Step up 100 m <span class="quest-status">⏳ Not yet</span></li>
-    <li id="quest-sleep" class="quest-item">💤 Sleep 8 hours <span class="quest-status">⏳ Not yet</span></li>
-    <li id="quest-ex30"  class="quest-item">💪 Exercise 30 minutes <span class="quest-status">⏳ Not yet</span></li>
-  `;
-}
-
-function setQuestState(id, done) {
-  const li = document.getElementById(id);
-  if (!li) return;
-  li.classList.toggle("done", done);
-  li.querySelector(".quest-status").textContent = done ? "✅ Completed" : "⏳ Not yet";
-}
-
-async function updateDailyQuestStatus(provider, userAddress) {
+/* =================== Quests: today-only completion for 5km & 100m =================== */
+async function updateDailyQuestStatus(provider, userAddress){
   try {
     const logger = new ethers.Contract(activityLoggerAddress, activityLoggerAbi, provider);
     const activities = await logger.getUserActivities(userAddress);
 
-    // today-only window
     const midnight = new Date(); midnight.setHours(0,0,0,0);
-    const todayStart = Math.floor(midnight.getTime() / 1000);
+    const todayStart = Math.floor(midnight.getTime()/1000);
 
-    let did5k = false, didElev = false;
+    let prog5k = 0, progElev = 0;
 
-    for (const a of activities) {
-      const dist = a.distanceKmX100 ?? a[0];   // x100 (500 => 5.00 km)
-      const elev = a.elevationGainM ?? a[1];   // meters
+    for(const a of activities){
+      const dist = a.distanceKmX100 ?? a[0]; // x100 (500 = 5.00 km)
+      const elev = a.elevationGainM ?? a[1]; // meters
       const ts   = Number(a.timestamp ?? a[2]);
       if (ts < todayStart) continue;
 
-      if (ethers.BigNumber.from(dist).gte(500)) did5k = true;
-      if (ethers.BigNumber.from(elev).gte(100)) didElev = true;
-
-      if (did5k && didElev) break;
+      if (ethers.BigNumber.from(dist).gte(500)) prog5k = 1;
+      if (ethers.BigNumber.from(elev).gte(100)) progElev = 1;
+      if (prog5k && progElev) break;
     }
 
-    setQuestState("quest-5k", did5k);
-    setQuestState("quest-elev", didElev);
-    // Sleep 8h & Exercise 30m remain static (no logic requested)
-
-  } catch (e) {
+    setQuestProgress('q-5k',   prog5k);
+    setQuestProgress('q-elev', progElev);
+    // q-sleep & q-ex30 remain static per your request
+  } catch(e){
     console.error("Failed to update quests:", e);
   }
 }
 
-/* ===== Boot ===== */
+/* =================== Boot =================== */
 window.addEventListener("load", initCharacterStatus);
 </script>
+
 
 
 
